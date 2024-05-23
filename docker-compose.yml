@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  # API App
+  node_app:
+    image: node:20.13.1
+    command: >
+      bash -c "
+        cd app &&
+        npm install &&
+        npm run debug
+      "
+    ports:
+      - "${API_PORT}:3000"
+    volumes:
+      - ./src:/app/src
+      - ./:/app
+    depends_on:
+      - postgres_db
+
+  # database
+  postgres_db:
+    image: postgres:14.12
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USERNAME}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_MAIN_DB}
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data:z
+
+  # database dashboard
+  pgadmin:
+    image: dpage/pgadmin4:8.6
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+    ports:
+      - "${PGADMIN_PORT}:80"
