@@ -58,7 +58,7 @@ export const patient = pgTable('patient', {
 	hashedPassword: text('hashed_password').notNull(),
 	enrolledAt: timestamp('enrolled_at', { mode: 'date', precision: 0, withTimezone: false }).defaultNow().notNull()
 }, (patient) => ({
-	usernameIDx: index('username_idx').on(patient.username),
+	usernameIDx: index('p_username_idx').on(patient.username),
 }));
 
 export const patient_staff = pgTable('patient_staff', {
