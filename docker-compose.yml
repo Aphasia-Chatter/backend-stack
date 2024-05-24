@@ -10,6 +10,10 @@ services:
         npm install &&
         npm run debug
       "
+    environment:
+      POSTGRES_USER: ${POSTGRES_USERNAME}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_MAIN_DB}
     ports:
       - "${API_PORT}:3000"
     volumes:
