@@ -8,6 +8,7 @@ services:
       bash -c "
         cd app &&
         chmod +x migration-helper.sh &&
+        sleep ${MIGRATION_DELAY_SECONDS} &&
         ./migration-helper.sh &&
         npm install &&
         npm run debug

@@ -47,14 +47,12 @@ export const enrollmentCode = pgTable('enrollment_code', {
 	code: varchar('code', { length: 256 }).primaryKey(),
 	staffID: uuid('staff_id').references(() => staff.id, { onDelete: 'cascade' }).notNull(),
 	patientUsername: text('patient_username').notNull().unique(),
-	encryptedPatientEmail: text('encrypted_patient_email').notNull().unique(),
 	createdAt: date('created_at', { mode: "date" }).defaultNow().notNull(),
 })
 
 export const patient = pgTable('patient', {
 	id: uuid('id').defaultRandom().primaryKey(),
 	username: text('username').notNull().unique(),
-	encryptedEmail: text('encrypted_email').notNull().unique(),
 	hashedPassword: text('hashed_password').notNull(),
 	enrolledAt: timestamp('enrolled_at', { mode: 'date', precision: 0, withTimezone: false }).defaultNow().notNull()
 }, (patient) => ({
