@@ -10,7 +10,7 @@
     "debug": "nodemon src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
-    "preview": "node dist/index.js"
+    "preview": "node dist/src/index.js"
   },
   "keywords": [],
   "author": "",
