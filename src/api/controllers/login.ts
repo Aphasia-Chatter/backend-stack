@@ -1,14 +1,5 @@
-import { json } from 'drizzle-orm/mysql-core';
 import { Request, Response } from 'express';
 
-
-import AES from 'crypto-js/aes';
-
-import { eq } from 'drizzle-orm';
-import * as argon2 from "argon2";
-
-import { db } from 'src/db';
-import * as schema from 'src/schema'
 import generateSessionToken from '../utils/generateSessionToken';
 import encryptClientInformation from '../utils/encryptClientInformation';
 import hashString from '../utils/hashString';
@@ -17,13 +8,19 @@ import validateHash from '../utils/validateHash';
 import selectStaffByUsername from '../repositories/selectStaffByUsername';
 import insertLog from '../repositories/insertLog';
 
+export enum LoginType {
+    STAFF,
+    PATIENT,
+    ADMIN
+}
+
 interface LoginRequest {
     username: string;
     password: string;
     client_information: string;
 }
 
-export default async function login(req: Request, res: Response){
+export default async function login(req: Request, res: Response, loginType: LoginType){
     const jsonReq = req.body as Partial<LoginRequest>;
 
     if (!jsonReq.username) {
@@ -50,6 +47,18 @@ export default async function login(req: Request, res: Response){
         }); 
     }
 
+    if (loginType == LoginType.STAFF) {
+        await loginStaff(jsonReq as LoginRequest, res)
+    } else {
+        return res.status(501).json({
+            'status': 'NOT_IMPLEMENTED',
+            'message': 'This is yet TODO!',
+            'data': {}
+        });
+    }
+}
+
+async function loginStaff(jsonReq: LoginRequest, res: Response) {
     const result = await selectStaffByUsername(jsonReq.username)
     if (result.length <= 0) {
         return res.status(400).json({
