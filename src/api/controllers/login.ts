@@ -17,7 +17,6 @@ export enum LoginType {
 interface LoginRequest {
     username: string;
     password: string;
-    client_information: string;
 }
 
 export default async function login(req: Request, res: Response, loginType: LoginType){
@@ -39,16 +38,8 @@ export default async function login(req: Request, res: Response, loginType: Logi
         }); 
     }
 
-    if (!jsonReq.client_information) {
-        return res.status(400).json({
-            'status': 'MISSING_CLIENT_INFO',
-            'message': 'Missing client information (client_information) in request body field',
-            'data': {}
-        }); 
-    }
-
     if (loginType == LoginType.STAFF) {
-        await loginStaff(jsonReq as LoginRequest, res)
+        await loginStaff(jsonReq as LoginRequest, req, res)
     } else {
         return res.status(501).json({
             'status': 'NOT_IMPLEMENTED',
@@ -58,7 +49,7 @@ export default async function login(req: Request, res: Response, loginType: Logi
     }
 }
 
-async function loginStaff(jsonReq: LoginRequest, res: Response) {
+async function loginStaff(jsonReq: LoginRequest, req: Request, res: Response) {
     const result = await selectStaffByUsername(jsonReq.username)
     if (result.length <= 0) {
         return res.status(400).json({
@@ -79,7 +70,8 @@ async function loginStaff(jsonReq: LoginRequest, res: Response) {
         }
 
         const generatedToken =  generateSessionToken()
-        const encryptedClientInfo = encryptClientInformation(jsonReq.client_information)
+        const clientInfo = req.headers['user-agent'] as string;
+        const encryptedClientInfo = encryptClientInformation(clientInfo)
     
         const hashedToken = await hashString(generatedToken)
         await insertStaffSessionToken(hashedToken, relatedUser.id, encryptedClientInfo.toString())
