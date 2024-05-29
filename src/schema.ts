@@ -112,11 +112,15 @@ export const taskEditor = pgTable('task_editor', {
 })
 
 //#region Word Retrieval Task
+export const wordRetrievalInputRestriction = pgEnum('word_retrieval_input_restriction', [
+	'NONE', 'TEXT_ONLY', 'VOICE_ONLY']
+);
 
 export const wordRetrievalTask = pgTable('word_retrieval_task', {
 	taskID: uuid('task_id').references(() => task.id, { onDelete: 'cascade' }).notNull().primaryKey(),
 	imagePath: text('image_path').notNull(),
-	answer: text('answer').notNull()
+	answer: text('answer').notNull(),
+	inputRestriction: wordRetrievalInputRestriction('input_restriction').notNull().default("NONE")
 })
 
 export const wordRetrievalHintTypeEnum = pgEnum('word_retrieval_hint_type_enum', ['message', 'option_select']);
@@ -159,3 +163,14 @@ export const wordRetrievalSessionMessage = pgTable('word_retrieval_session_messa
 
 
 //#endregion
+
+export const logSeverityEnum = pgEnum('log_severity_enum', 
+	['INFO', 'DEBUG', 'VERBOSE', 'WARNING', 'ERROR', 'CRITICAL']
+)
+
+export const log = pgTable('log', {
+	id: serial('id').primaryKey(),
+	message: text('message').notNull(),
+	severity: logSeverityEnum('severity').notNull().default("INFO"),
+	at: timestamp('at', { mode: 'date', precision: 0, withTimezone: false }).defaultNow().notNull(),
+})
