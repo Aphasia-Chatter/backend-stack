@@ -16,10 +16,10 @@ export default async function createDefaultStaffIfNoneExists() {
 
         hashedPassword = await argon2.hash(defaultStaffPassword + hashPepper);
     } catch (err) {
-        insertLog(`Failed to create default staff user due to hashing issues :: ${err}`, "CRITICAL")
+        await insertLog(`Failed to create default staff user due to hashing issues :: ${err}`, "CRITICAL")
         return;
     }
 
     const defaultStaffUsername = process.env.DEFAULT_STAFF_USERNAME || 'staff'
-    insertStaff(defaultStaffUsername, hashedPassword)
+    await insertStaff(defaultStaffUsername, hashedPassword)
 }

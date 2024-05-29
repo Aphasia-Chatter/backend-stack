@@ -16,11 +16,14 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/crypto-js": "^4.2.2",
     "argon2": "^0.40.3",
+    "crypto-js": "^4.2.0",
     "drizzle-orm": "^0.30.10",
     "express": "^4.19.2",
     "pg": "^8.11.5",
     "postgres": "^3.4.4",
+    "randomized-string": "^2.0.1",
     "tsconfig-paths": "^4.2.0"
   },
   "devDependencies": {
