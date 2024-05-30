@@ -11,6 +11,10 @@ const port = 3000;
 
 app.use('/api/staff', staffRoutes);
 
+app.get('/api/ping', (req, res) => {
+	res.send('Pong!');
+  });
+
 app.listen(port, () => {
 	console.log(`Server is running on port ${port}`);
 
