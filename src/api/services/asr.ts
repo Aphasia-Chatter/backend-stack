@@ -15,7 +15,7 @@ export async function transcribe(req: Request, res: Response) {
 
         1. Receive the POST request
         2. Call 'saveAudioFile()', which saves the file into the 'audios' directory and reads the file name 
-        3. 
+        3. Call the OpenAI Whisper Model and return the transcribed text
     */
    const fileName = saveAudioFile(req);
    const audioFileDir = path.join(__dirname, '../../audios')
