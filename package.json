@@ -16,8 +16,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/cors": "^2.8.17",
     "@types/crypto-js": "^4.2.2",
     "argon2": "^0.40.3",
+    "cors": "^2.8.5",
     "crypto-js": "^4.2.0",
     "drizzle-orm": "^0.30.10",
     "express": "^4.19.2",
