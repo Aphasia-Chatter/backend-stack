@@ -4,20 +4,17 @@ import cors from 'cors';
 import createDefaultStaffIfNoneExists from './api/utils/createDefaultStaffIfNoneExists';
 import insertLog from './api/repositories/insertLog';
 import staffRoutes from './api/routes/staffRoutes';
+import patientRoutes from './api/routes/patientRoutes';
 
 const app = express();
 const port = 3000;
 
-// Added to resolve CORS issue
-const corsOptions = {
-	origin: "http://localhost:8081"
-};
-
-app.use(cors(corsOptions));
-
+app.use(cors());
 app.use(express.json());
 
+// Routes
 app.use('/api/staff', staffRoutes);
+app.use('/api/patient', patientRoutes);
 
 
 app.get('/api/ping', (req, res) => {
