@@ -7,6 +7,10 @@ import insertLog from './api/repositories/insertLog';
 import staffRoutes from './api/routes/staffRoutes';
 import asrRoutes from './api/routes/asrRoutes';
 
+import path from 'path';
+import { dirname } from 'path';
+import { fileURLToPath } from 'url';
+
 const app = express();
 
 /*
@@ -16,22 +20,10 @@ const app = express();
 app.use(express.json()); 
 
 const port = 3000;
+const __dirname = dirname(''); // Root path
 
-// Configure storage
-const storage: StorageEngine = multer.diskStorage({
-	destination: (req, file, cb) => {
-		cb(null, 'audios/');
-	},
-	filename: (req, file, cb) => {
-		cb(null, `${Date.now()}-${file.originalname}`);
-	}
-});
-
-// Initialise upload middleware
-const upload = multer({ storage: storage });
-
-// Ensure that the 'uploads' directory exists
-const uploadDir = 'audios';
+// Ensure that the 'uploads' directory exists, if not, create one at root
+const uploadDir = path.join(__dirname, 'audios');
 if (!fs.existsSync(uploadDir)) {
 	fs.mkdirSync(uploadDir);
 }
