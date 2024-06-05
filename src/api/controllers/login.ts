@@ -61,7 +61,8 @@ async function loginStaff(jsonReq: LoginRequest, req: Request, res: Response) {
     const relatedUser = result[0]
 
     try {
-        if (!validateHash(jsonReq.password, relatedUser.hashedPassword)) {
+        // added await because validateHash is a background task
+        if (!(await validateHash(jsonReq.password, relatedUser.hashedPassword))) {
             return res.status(400).json({
                 'status': 'BAD_PASSWORD',
                 'message': 'Password mismatch!',
