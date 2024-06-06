@@ -1,25 +1,35 @@
 import express, { Request, Response } from 'express';
-import cors from 'cors';
+import multer, { StorageEngine } from 'multer';
+import fs from 'fs'
 
 import createDefaultStaffIfNoneExists from './api/utils/createDefaultStaffIfNoneExists';
 import insertLog from './api/repositories/insertLog';
 import staffRoutes from './api/routes/staffRoutes';
-import patientRoutes from './api/routes/patientRoutes';
+import asrRoutes from './api/routes/asrRoutes';
+
+import path from 'path';
+import { dirname } from 'path';
+import { fileURLToPath } from 'url';
 
 const app = express();
+
+/*
+	Middleware that converts the body of any request to 
+	JSON format.
+*/
+app.use(express.json()); 
+
 const port = 3000;
+const __dirname = dirname(''); // Root path
 
-app.use(cors());
-app.use(express.json());
+// Ensure that the 'uploads' directory exists, if not, create one at root
+const uploadDir = path.join(__dirname, 'audios');
+if (!fs.existsSync(uploadDir)) {
+	fs.mkdirSync(uploadDir);
+}
 
-// Routes
 app.use('/api/staff', staffRoutes);
-app.use('/api/patient', patientRoutes);
-
-
-app.get('/api/ping', (req, res) => {
-	res.send('Pong!');
-  });
+app.use('/api/asr', asrRoutes)
 
 app.listen(port, () => {
 	console.log(`Server is running on port ${port}`);
