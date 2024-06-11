@@ -4,7 +4,7 @@ import * as argon2 from "argon2";
 import insertStaff from "../repositories/insertStaff";
 import insertPatient from "../repositories/insertPatient";
 import selectStaffByUsername from '../repositories/selectStaffByUsername';
-import selectPatientByUsername from '../repositories/selectStaffByUsername';
+import selectPatientByUsername from '../repositories/selectPatientByUsername';
 import insertLog from '../repositories/insertLog';
 
 export enum RegisterType {
@@ -65,18 +65,10 @@ export default async function register(req: Request, res: Response, registerType
 
     if (registerType == RegisterType.STAFF) {
         await registerStaff(jsonReq as RegisterRequest, res)
-        return res.status(201).json({
-            status: 'REGISTRATION SUCCESS',
-            message: 'Staff account registered successfully',
-          });
     }
 
     else if (registerType == RegisterType.PATIENT) {
         await registerPatient(jsonReq as RegisterRequest, res)
-        return res.status(201).json({
-            status: 'REGISTRATION SUCCESS',
-            message: 'Patient account registered successfully',
-          });
     }
     
     else {
@@ -109,12 +101,19 @@ async function registerStaff(jsonReq: RegisterRequest, res: Response) {
             hashedPassword = await argon2.hash(staffPassword + hashPepper);
         } catch (err) {
             await insertLog(`Failed to create staff user due to hashing issues :: ${err}`, "CRITICAL")
-            return;
+            return res.status(400).json({
+                'status': 'HASHING_ERROR',
+                'message': 'Failed to create patient user due to hashing issues.'
+            }); 
         }
 
         // Create staff account in the database
         const staffUsername = jsonReq.username
         await insertStaff(staffUsername, hashedPassword)
+        return res.status(201).json({
+            status: 'REGISTRATION SUCCESS',
+            message: 'Staff account registered successfully',
+          });
     }
 }
 
@@ -141,11 +140,18 @@ async function registerPatient(jsonReq: RegisterRequest, res: Response) {
             hashedPassword = await argon2.hash(patientPassword + hashPepper);
         } catch (err) {
             await insertLog(`Failed to create patient user due to hashing issues :: ${err}`, "CRITICAL")
-            return;
+            return res.status(400).json({
+                'status': 'HASHING_ERROR',
+                'message': 'Failed to create patient user due to hashing issues.'
+            }); 
         }
 
         // Create patient account in the database
         const patientUsername = jsonReq.username
         await insertPatient(patientUsername, hashedPassword)
+        return res.status(201).json({
+            status: 'REGISTRATION SUCCESS',
+            message: 'Patient account registered successfully',
+          });
     }
 }
