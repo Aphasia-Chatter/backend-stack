@@ -12,7 +12,7 @@ export enum LogoutType {
 
 interface LogoutRequest {
     username: string;
-    sessionId: string;
+    sessionToken: string;
 }
 
 export default async function logout(req: Request, res: Response, logoutType: LogoutType) {
@@ -22,6 +22,14 @@ export default async function logout(req: Request, res: Response, logoutType: Lo
         return res.status(400).json({
             'status': 'MISSING_USERNAME',
             'message': 'username is missing in the request body field.',
+            'data': {}
+        });
+    }
+
+    if (!jsonReq.sessionToken) {
+        return res.status(400).json({
+            'status': 'MISSING_SESSION',
+            'message': 'session is missing in the request body field.',
             'data': {}
         });
     }
@@ -54,7 +62,7 @@ async function logoutStaff(jsonReq: LogoutRequest, res: Response) {
     const relatedUser = result[0]
 
     try {    
-        await deleteStaffSessionToken(relatedUser.id, jsonReq.sessionId)
+        await deleteStaffSessionToken(relatedUser.id, jsonReq.sessionToken)
         return res.status(200).json({
             'status': 'SUCCESS',
             'message': 'Staff Logout successful, deleted the session token!',
@@ -71,6 +79,8 @@ async function logoutStaff(jsonReq: LogoutRequest, res: Response) {
 // Patient Logout Function
 async function logoutPatient(jsonReq: LogoutRequest, res: Response) {
     const result = await selectPatientByUsername(jsonReq.username)
+    console.log("Hello::: ", result.length)
+
     if (result.length <= 0) {
         return res.status(400).json({
             'status': 'BAD_USERNAME',
@@ -82,7 +92,7 @@ async function logoutPatient(jsonReq: LogoutRequest, res: Response) {
     const relatedUser = result[0]
 
     try {    
-        await deletePatientSessionToken(relatedUser.id, jsonReq.sessionId)
+        await deletePatientSessionToken(relatedUser.id, jsonReq.sessionToken)
         return res.status(200).json({
             'status': 'SUCCESS',
             'message': 'Patient Logout successful, deleted the session token!',

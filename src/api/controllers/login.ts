@@ -65,6 +65,7 @@ async function loginStaff(jsonReq: LoginRequest, req: Request, res: Response) {
             'data': {}
         }); 
     }
+    
     const relatedUser = result[0]
 
     try {
@@ -88,7 +89,8 @@ async function loginStaff(jsonReq: LoginRequest, req: Request, res: Response) {
             'status': 'SUCCESS',
             'message': 'Login successful, save the session token inside data!',
             'data': {
-                'session_token': generatedToken
+                'username': jsonReq.username,
+                'session_token': hashedToken
             }
         }); 
       } catch (err) {
@@ -133,7 +135,7 @@ async function loginPatient(jsonReq: LoginRequest, req: Request, res: Response) 
             'message': 'Login successful, save the session token inside data!',
             'data': {
                 'username': jsonReq.username,
-                'session_token': generatedToken
+                'sessionToken': hashedToken
             }
         });
         

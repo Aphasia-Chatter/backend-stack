@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import login, { LoginType } from '../controllers/login';
 import register, { RegisterType } from '../controllers/register';
+import logout, { LogoutType } from '../controllers/logout';
 import checkToken from '../controllers/checkToken';
 
 const router: Router = Router();
@@ -22,7 +23,7 @@ router.post('/register', (req: Request, res: Response) => {
 
 // /api/staff/logout
 router.post('/logout', (req: Request, res: Response) => {
-  register(req, res, RegisterType.STAFF)
+  logout(req, res, LogoutType.STAFF)
 })
 
 export default router;
