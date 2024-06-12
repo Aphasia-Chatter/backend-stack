@@ -20,4 +20,9 @@ router.post('/register', (req: Request, res: Response) => {
   register(req, res, RegisterType.PATIENT)
 })
 
+// /api/patient/logout
+router.post('/logout', (req: Request, res: Response) => {
+  register(req, res, RegisterType.PATIENT)
+})
+
 export default router;

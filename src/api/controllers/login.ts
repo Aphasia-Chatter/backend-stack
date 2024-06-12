@@ -107,8 +107,7 @@ async function loginPatient(jsonReq: LoginRequest, req: Request, res: Response) 
     if (result.length <= 0) {
         return res.status(400).json({
             'status': 'BAD_USERNAME',
-            'message': 'User does not exist!',
-            'data': {}
+            'message': 'User does not exist!'
         }); 
     }
     const relatedUser = result[0]
@@ -119,7 +118,6 @@ async function loginPatient(jsonReq: LoginRequest, req: Request, res: Response) 
             return res.status(400).json({
                 'status': 'BAD_PASSWORD',
                 'message': 'Password mismatch!',
-                'data': {}
             }); 
         }
 
@@ -131,9 +129,10 @@ async function loginPatient(jsonReq: LoginRequest, req: Request, res: Response) 
         await insertPatientSessionToken(hashedToken, relatedUser.id, encryptedClientInfo.toString())
 
         return res.status(200).json({
-            'status': 'SUCCESS',
+            'status': 'LOGIN_SUCCESS',
             'message': 'Login successful, save the session token inside data!',
             'data': {
+                'username': jsonReq.username,
                 'session_token': generatedToken
             }
         });
@@ -143,7 +142,6 @@ async function loginPatient(jsonReq: LoginRequest, req: Request, res: Response) 
         return res.status(500).json({
             'status': 'SERVER_ERROR',
             'message': 'Server encountered an error! Contact admin if persists!',
-            'data': {}
         }); 
     }
 }
