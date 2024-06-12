@@ -1,0 +1,132 @@
+import { Request, Response } from 'express';
+
+import deleteStaff from '../repositories/deleteStaff';
+import deletePatient from '../repositories/deletePatient';
+import selectStaffByUsernameAndToken from '../repositories/selectStaffByUsernameAndToken';
+import selectPatientByUsernameAndToken from '../repositories/selectPatientByUsernameAndToken';
+
+
+export enum DeleteAccountType {
+    STAFF,
+    PATIENT
+}
+
+interface DeleteAccountRequest {
+    username: string;
+    password:  string;
+    sessionToken: string;
+}
+
+export default async function logout(req: Request, res: Response, deleteAccountType: DeleteAccountType) {
+    const jsonReq = req.body as Partial<DeleteAccountRequest>;
+
+    if (!jsonReq.username) {
+        return res.status(400).json({
+            'status': 'MISSING_USERNAME',
+            'message': 'username is missing in the request body field.',
+            'data': {}
+        });
+    }
+
+    if (!jsonReq.password) {
+        return res.status(400).json({
+            'status': 'MISSING_PASSWORD',
+            'message': 'password is missing in the request body field.',
+            'data': {}
+        }); 
+    }
+
+    if (!jsonReq.sessionToken) {
+        return res.status(400).json({
+            'status': 'MISSING_SESSION',
+            'message': 'session is missing in the request body field.',
+            'data': {}
+        });
+    }
+
+    if (deleteAccountType == DeleteAccountType.STAFF) {
+        await deleteAccountStaff(jsonReq as DeleteAccountRequest, res)
+    }
+    else if (deleteAccountType == DeleteAccountType.PATIENT) {
+        await deleteAccountPatient(jsonReq as DeleteAccountRequest, res)
+    }
+    else {
+        return res.status(501).json({
+            'status': 'NOT_IMPLEMENTED',
+            'message': 'This is yet TODO!'
+        });
+    }
+}
+
+// Staff Logout Function
+async function deleteAccountStaff(jsonReq: DeleteAccountRequest, res: Response) {
+    // Check if staff with session exists
+    const result = await selectStaffByUsernameAndToken(jsonReq.username, jsonReq.sessionToken)
+    if (result.length <= 0) {
+        return res.status(400).json({
+            'status': 'BAD_STAFF_ACCOUNT',
+            'message': 'User does not exist!'
+        }); 
+    }
+
+    const relatedStaff = result[0]
+    
+    try {
+        // Check if password entered is not equal to password stored
+        if (jsonReq.password != relatedStaff.staff.username) {
+            return res.status(400).json({
+                'status': 'DELETE_ACCOUNT_FAILURE',
+                'message': 'Incorrect password! Unable to delete staff account.',
+            }); 
+        } 
+        else {
+            await deleteStaff(relatedStaff.staff.id, relatedStaff.staff.hashedPassword)
+            return res.status(200).json({
+                'status': 'DELETE_ACCOUNT_SUCCESS',
+                'message': 'Patient deletion is successful!',
+            }); 
+        }
+      } catch (err) {
+        return res.status(500).json({
+            'status': 'SERVER_ERROR',
+            'message': 'Server encountered an error! Contact admin if persists!',
+            'data': {}
+        });
+    }
+}
+
+// Patient Logout Function
+async function deleteAccountPatient(jsonReq: DeleteAccountRequest, res: Response) {
+    const result = await selectPatientByUsernameAndToken(jsonReq.username, jsonReq.sessionToken)
+    if (result.length <= 0) {
+        return res.status(400).json({
+            'status': 'BAD_PATIENT_ACCOUNT',
+            'message': 'User does not exist!'
+        }); 
+    }
+
+    const relatedPatient = result[0]
+    
+    try {
+        // Check if password entered is not equal to password stored
+        if (jsonReq.password != relatedPatient.patient.username) {
+            return res.status(400).json({
+                'status': 'DELETE_ACCOUNT_FAILURE',
+                'message': 'Incorrect password! Unable to delete patient account.',
+            }); 
+        } 
+        else {
+            await deletePatient(relatedPatient.patient.id, relatedPatient.patient.hashedPassword)
+            return res.status(200).json({
+                'status': 'DELETE_ACCOUNT_SUCCESS',
+                'message': 'Patient deletion is successful',
+            }); 
+        }
+      } catch (err) {
+        return res.status(500).json({
+            'status': 'SERVER_ERROR',
+            'message': 'Server encountered an error! Contact admin if persists!',
+            'data': {}
+        });
+    }
+}
