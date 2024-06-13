@@ -4,6 +4,7 @@ import deleteStaff from '../repositories/deleteStaff';
 import deletePatient from '../repositories/deletePatient';
 import selectStaffByUsernameAndToken from '../repositories/selectStaffByUsernameAndToken';
 import selectPatientByUsernameAndToken from '../repositories/selectPatientByUsernameAndToken';
+import validateHash from '../utils/validateHash';
 
 
 export enum DeleteAccountType {
@@ -17,8 +18,11 @@ interface DeleteAccountRequest {
     sessionToken: string;
 }
 
-export default async function logout(req: Request, res: Response, deleteAccountType: DeleteAccountType) {
+export default async function deleteAccount(req: Request, res: Response, deleteAccountType: DeleteAccountType) {
     const jsonReq = req.body as Partial<DeleteAccountRequest>;
+    console.log("user:", jsonReq.username)
+    console.log("pw:", jsonReq.password)
+    console.log("Session T:", jsonReq.sessionToken)
 
     if (!jsonReq.username) {
         return res.status(400).json({
@@ -58,7 +62,7 @@ export default async function logout(req: Request, res: Response, deleteAccountT
     }
 }
 
-// Staff Logout Function
+// Staff Delete Account Function
 async function deleteAccountStaff(jsonReq: DeleteAccountRequest, res: Response) {
     // Check if staff with session exists
     const result = await selectStaffByUsernameAndToken(jsonReq.username, jsonReq.sessionToken)
@@ -72,15 +76,16 @@ async function deleteAccountStaff(jsonReq: DeleteAccountRequest, res: Response) 
     const relatedStaff = result[0]
     
     try {
-        // Check if password entered is not equal to password stored
-        if (jsonReq.password != relatedStaff.staff.username) {
+        // Check for password hash
+        if (!(await validateHash(jsonReq.password, relatedStaff.staff.hashedPassword))) {
             return res.status(400).json({
                 'status': 'DELETE_ACCOUNT_FAILURE',
                 'message': 'Incorrect password! Unable to delete staff account.',
+                'data': {}
             }); 
-        } 
+        }
         else {
-            await deleteStaff(relatedStaff.staff.id, relatedStaff.staff.hashedPassword)
+            await deleteStaff(relatedStaff.staff.username, relatedStaff.staff.hashedPassword)
             return res.status(200).json({
                 'status': 'DELETE_ACCOUNT_SUCCESS',
                 'message': 'Patient deletion is successful!',
@@ -95,7 +100,7 @@ async function deleteAccountStaff(jsonReq: DeleteAccountRequest, res: Response) 
     }
 }
 
-// Patient Logout Function
+// Patient Delete Account Function
 async function deleteAccountPatient(jsonReq: DeleteAccountRequest, res: Response) {
     const result = await selectPatientByUsernameAndToken(jsonReq.username, jsonReq.sessionToken)
     if (result.length <= 0) {
@@ -108,15 +113,16 @@ async function deleteAccountPatient(jsonReq: DeleteAccountRequest, res: Response
     const relatedPatient = result[0]
     
     try {
-        // Check if password entered is not equal to password stored
-        if (jsonReq.password != relatedPatient.patient.username) {
+        // Check for password hash
+        if (!(await validateHash(jsonReq.password, relatedPatient.patient.hashedPassword))) {
             return res.status(400).json({
                 'status': 'DELETE_ACCOUNT_FAILURE',
-                'message': 'Incorrect password! Unable to delete patient account.',
+                'message': 'Incorrect password! Unable to delete staff account.',
+                'data': {}
             }); 
-        } 
+        }
         else {
-            await deletePatient(relatedPatient.patient.id, relatedPatient.patient.hashedPassword)
+            await deletePatient(relatedPatient.patient.username, relatedPatient.patient.hashedPassword)
             return res.status(200).json({
                 'status': 'DELETE_ACCOUNT_SUCCESS',
                 'message': 'Patient deletion is successful',
