@@ -6,6 +6,11 @@ import createDefaultStaffIfNoneExists from './api/utils/createDefaultStaffIfNone
 import insertLog from './api/repositories/insertLog';
 import staffRoutes from './api/routes/staffRoutes';
 import asrRoutes from './api/routes/asrRoutes';
+import verifyRoutes from './api/routes/verifyRoutes';
+
+import path from 'path';
+import { dirname } from 'path';
+import { fileURLToPath } from 'url';
 
 const app = express();
 
@@ -16,28 +21,17 @@ const app = express();
 app.use(express.json()); 
 
 const port = 3000;
+const __dirname = dirname(''); // Root path
 
-// Configure storage
-const storage: StorageEngine = multer.diskStorage({
-	destination: (req, file, cb) => {
-		cb(null, 'audios/');
-	},
-	filename: (req, file, cb) => {
-		cb(null, `${Date.now()}-${file.originalname}`);
-	}
-});
-
-// Initialise upload middleware
-const upload = multer({ storage: storage });
-
-// Ensure that the 'uploads' directory exists
-const uploadDir = 'audios';
+// Ensure that the 'uploads' directory exists, if not, create one at root
+const uploadDir = path.join(__dirname, 'audios');
 if (!fs.existsSync(uploadDir)) {
 	fs.mkdirSync(uploadDir);
 }
 
 app.use('/api/staff', staffRoutes);
 app.use('/api/asr', asrRoutes)
+app.use('/api/verify', verifyRoutes)
 
 app.listen(port, () => {
 	console.log(`Server is running on port ${port}`);
