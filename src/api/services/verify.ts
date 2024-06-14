@@ -24,7 +24,8 @@ export async function verify(req: Request, res: Response): Promise<Response> {
                 status: "SUCCESS",
                 user_answer: user_answer,
                 task: result[0],
-                correct: true
+                correct: true,
+                messages: []    // Response for correct answer
             })
         } else if (result[0]['answer'] != user_answer) {
             /*
@@ -39,7 +40,7 @@ export async function verify(req: Request, res: Response): Promise<Response> {
                 status: "SUCCESS",
                 task: result[0],
                 correct: false,
-                messages: []
+                cues: [] // Cues to be in here
             })
         } else {
             return res.status(400).json({
