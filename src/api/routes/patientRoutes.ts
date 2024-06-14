@@ -29,7 +29,7 @@ router.post('/logout', (req: Request, res: Response) => {
 })
 
 // /api/patient/delete_account
-router.post('/delete_account', (req: Request, res: Response) => {
+router.post('/delete-account', (req: Request, res: Response) => {
   deleteAccount(req, res, DeleteAccountType.PATIENT)
 })
 
