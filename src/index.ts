@@ -12,10 +12,6 @@ import path from 'path';
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
 
-import path from 'path';
-import { dirname } from 'path';
-import { fileURLToPath } from 'url';
-
 const app = express();
 
 /*
