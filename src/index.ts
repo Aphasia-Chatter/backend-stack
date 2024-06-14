@@ -6,6 +6,11 @@ import createDefaultStaffIfNoneExists from './api/utils/createDefaultStaffIfNone
 import insertLog from './api/repositories/insertLog';
 import staffRoutes from './api/routes/staffRoutes';
 import asrRoutes from './api/routes/asrRoutes';
+import verifyRoutes from './api/routes/verifyRoutes';
+
+import path from 'path';
+import { dirname } from 'path';
+import { fileURLToPath } from 'url';
 
 import path from 'path';
 import { dirname } from 'path';
@@ -30,6 +35,7 @@ if (!fs.existsSync(uploadDir)) {
 
 app.use('/api/staff', staffRoutes);
 app.use('/api/asr', asrRoutes)
+app.use('/api/verify', verifyRoutes)
 
 app.listen(port, () => {
 	console.log(`Server is running on port ${port}`);
