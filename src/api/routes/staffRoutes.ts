@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import login, { LoginType } from '../controllers/login';
-import checkToken from '../controllers/checkToken';
+import checkToken from '../controllers/staff/checkToken';
 
 const router: Router = Router();
 
