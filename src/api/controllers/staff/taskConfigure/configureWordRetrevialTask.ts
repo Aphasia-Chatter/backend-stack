@@ -59,7 +59,7 @@ export async function configureWordRetrevialTask(
         if (!taskName || !taskAnswer || !taskVisibility) {
             deleteUploadedFile(req);
             return res.status(400).json({
-                'status': 'BLANK_OR_EMPTY_PARAMETERS',
+                'status': 'BLANK_PARAMETERS',
                 'message': `Missing parameter. Echo: (name: '${taskName}'), (description: '${taskDescription}'), (visibility: '${taskVisibility}'), (answer: '${taskAnswer}')`,
                 'data': {}
             });
