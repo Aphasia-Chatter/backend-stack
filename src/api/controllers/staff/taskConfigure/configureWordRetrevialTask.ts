@@ -110,7 +110,7 @@ export async function configureWordRetrevialTask(
             if (existingTask.length > 0) {
                 deleteUploadedFile(req);
                 return res.status(400).json({
-                    status: "TASK_ALREADY_EXISTS",
+                    status: "NAME_CONFLICT",
                     message: "Task with the input name already exists!",
                     data: {
                         'existing_task_id': existingTask[0].id
