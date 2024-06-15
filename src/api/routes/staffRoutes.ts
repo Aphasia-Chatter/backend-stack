@@ -7,6 +7,7 @@ import { WORD_RETREVIAL_TASK_ASSETS_DIRECTORY } from '../config/directories';
 import checkToken from '../controllers/staff/checkToken';
 import login, { LoginType } from '../controllers/login';
 import { multerImagefileFilter } from '../utils/multerImageFileFilter';
+import configureTask from '../controllers/staff/taskConfigure/configureTask';
 
 const router: Router = Router();
 
@@ -20,6 +21,7 @@ router.get('/validate-token', (req: Request, res: Response) => {
 	checkToken(req, res)
 });
 
+//#region Word Retrevial Tasks
 const wordRetrevialTaskstorage = multer.diskStorage({
 	destination: (req, file, cb) => {
 		cb(null, `${WORD_RETREVIAL_TASK_ASSETS_DIRECTORY}/`);
@@ -35,5 +37,10 @@ const wordRetrevialTaskstorage = multer.diskStorage({
 router.post('/create-word-retrevial-task', multer({ storage: wordRetrevialTaskstorage, fileFilter: multerImagefileFilter }).single('image'), (req: Request, res: Response) => {
 	createTask(req, res, TaskType.WORD_RETREVIAL)
 })
+
+router.put('/modify-word-retrevial-task', multer({ storage: wordRetrevialTaskstorage, fileFilter: multerImagefileFilter }).single('image'), (req: Request, res: Response) => {
+	configureTask(req, res, TaskType.WORD_RETREVIAL)	
+})
+//#endregion
 
 export default router;

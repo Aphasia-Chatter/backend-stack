@@ -8,5 +8,5 @@ export default async function selectWordRetrevialTaskByID(id: string) {
     .where(eq(task.id, id))
     .innerJoin(wordRetrievalTask, eq(task.id, wordRetrievalTask.taskID))
     .innerJoin(taskEditor, eq(taskEditor.taskID, task.id))
-    .innerJoin(wordRetrievalTaskHint, eq(wordRetrievalTaskHint.taskID, wordRetrievalTask.taskID))
+    .fullJoin(wordRetrievalTaskHint, eq(wordRetrievalTaskHint.taskID, wordRetrievalTask.taskID))
 }
