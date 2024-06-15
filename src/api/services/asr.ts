@@ -51,7 +51,7 @@ export async function transcribe(req: Request, res: Response): Promise<Response>
             status: "SUCCESS",
             transcription: transcription.text
         });
-
+    
     } catch (error: any) {
         // Error handling
         console.error("Error during transcription process:", error);

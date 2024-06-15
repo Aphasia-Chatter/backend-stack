@@ -36,7 +36,7 @@ interface ValidationResult {
  */
 export default async function validateStaffRequest(request: Request, userName: string): Promise<ValidationResult> {
     const sessionToken = request.headers['session-token'] as string;
-    if (!sessionToken) {
+    if (!sessionToken.trim()) {
         return {
             isValid: false,
             status: "MISSING_SESSION_TOKEN",
@@ -45,7 +45,7 @@ export default async function validateStaffRequest(request: Request, userName: s
         };
     }
 
-    if (!userName) {
+    if (!userName.trim()) {
         return {
             isValid: false,
             status: "MISSING_USERNAME",
