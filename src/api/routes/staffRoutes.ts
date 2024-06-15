@@ -8,6 +8,7 @@ import checkToken from '../controllers/staff/checkToken';
 import login, { LoginType } from '../controllers/login';
 import { multerImagefileFilter } from '../utils/multerImageFileFilter';
 import configureTask from '../controllers/staff/taskConfigure/configureTask';
+import getTask from '../controllers/staff/taskGetter/getTask';
 
 const router: Router = Router();
 
@@ -40,6 +41,10 @@ router.post('/create-word-retrevial-task', multer({ storage: wordRetrevialTaskst
 
 router.put('/modify-word-retrevial-task', multer({ storage: wordRetrevialTaskstorage, fileFilter: multerImagefileFilter }).single('image'), (req: Request, res: Response) => {
 	configureTask(req, res, TaskType.WORD_RETREVIAL)	
+})
+
+router.get('/get-word-retrevial-task', (req: Request, res: Response) => {
+	getTask(req, res, TaskType.WORD_RETREVIAL)
 })
 //#endregion
 
