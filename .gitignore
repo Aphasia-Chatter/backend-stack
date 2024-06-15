@@ -131,4 +131,7 @@ dist
 
 
 pgdata/
-drizzle/
+drizzle
+
+# Image assets for word retrevial task
+word_retrevial_task_assets/*

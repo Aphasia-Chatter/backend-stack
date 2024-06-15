@@ -11,6 +11,7 @@ import verifyRoutes from './api/routes/verifyRoutes';
 import path from 'path';
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { WORD_RETREVIAL_TASK_ASSETS_DIRECTORY } from './api/config/directories';
 
 const app = express();
 
@@ -21,13 +22,9 @@ const app = express();
 app.use(express.json()); 
 
 const port = 3000;
-const __dirname = dirname(''); // Root path
 
-// Ensure that the 'uploads' directory exists, if not, create one at root
-const uploadDir = path.join(__dirname, 'audios');
-if (!fs.existsSync(uploadDir)) {
-	fs.mkdirSync(uploadDir);
-}
+const requiredDirectories = ['audios', WORD_RETREVIAL_TASK_ASSETS_DIRECTORY];
+initalizeUploadDirectories(requiredDirectories);
 
 app.use('/api/staff', staffRoutes);
 app.use('/api/asr', asrRoutes)
@@ -40,3 +37,20 @@ app.listen(port, () => {
         insertLog(`Failed to create default staff user :: ${err}`, "CRITICAL")
 	})
 });
+
+
+/**
+ * Initializes the specified directories if they do not already exist.
+ *
+ * @param {string[]} directories - An array of directory paths to initialize.
+ */
+function initalizeUploadDirectories(directories: string[]) {
+	const __dirname = dirname('');
+	
+	for (const directory of directories) {
+		const uploadDir = path.join(__dirname, directory);
+		if (!fs.existsSync(uploadDir)) {
+			fs.mkdirSync(uploadDir);
+		}
+	}
+}
