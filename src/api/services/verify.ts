@@ -4,8 +4,12 @@ import path from 'path';
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { db } from 'src/db';
-import { wordRetrievalTask } from 'src/schema';
+import { wordRetrievalTask, wordRetrievalTaskHint, wordRetrievalHintTypeEnum } from 'src/schema';
 import { eq } from 'drizzle-orm';
+import tokenizeAnswer from '../utils/languageProcessor/tokenizeAnswer';
+import invoke from '../utils/llm/invoke';
+import insertWordRetrevialTaskHint from '../repositories/insertWordRetrievalTaskHint';
+import { except } from 'drizzle-orm/mysql-core';
 
 export async function verify(req: Request, res: Response): Promise<Response> {
     const request = req.body;
@@ -16,9 +20,13 @@ export async function verify(req: Request, res: Response): Promise<Response> {
         */
         const word_retrieval_task_id = request["word_retrieval_task_id"];
         const user_answer = request["user_answer"];
+        // Retrieve the words from the user_answer (ASR may pick up several words)
+        const words = tokenizeAnswer(user_answer);
+
         // Query from database first
         const result = await db.select().from(wordRetrievalTask).where(eq(wordRetrievalTask.taskID, word_retrieval_task_id));
         console.log(`Actual Answer: ${result[0]['answer']}`)
+        
         if (result[0]['answer'] === user_answer) {
             return res.status(200).json({
                 status: "SUCCESS",
@@ -36,11 +44,51 @@ export async function verify(req: Request, res: Response): Promise<Response> {
                  3. If there are no cues present, generate using OpenAI GPT and store it in the DB
                  4. Return JSON containing the cues
             */
+            const result_cues = await db.select().from(wordRetrievalTaskHint).where(eq(wordRetrievalTaskHint.taskID, word_retrieval_task_id));
+            const cues: any[] = [];
+            if (result_cues.length < 5) {
+                // Generate cues using OpenAI GPT
+                await invoke(`This is the target word: ${result[0]['answer']}. Generate for me some 
+                    meaningful cues that aids a person with aphasia to recall the target word. 
+                    Example Target Word: "Cat"
+                    
+                    Below are several examples of cues for the above target word.:
+                    
+                    What is Tom from Tom and Jerry?
+                    Feline animal
+                    Makes meow sound
+                    Pet at home
+                    Purr
+                    Has whiskers
+                    What animal is Garfield?
+
+                    Format like above.
+                    
+                    Exclude the quotation marks. I want to read the output line by line, so please do not include anything before or after the cues. 
+
+                    Generate 5 DIFFERENT cues.
+
+                    `)
+                    .then((response) => {
+                        const respose_cues = response ? response.split("\n") : [];
+                        console.log(respose_cues);
+                        for (let i = 0; i < respose_cues.length; i++) {
+                            cues.push(respose_cues[i]); 
+                            console.log(i + result_cues.length - 1)
+                            insertWordRetrevialTaskHint(i + result_cues.length, word_retrieval_task_id, cues[i], "message");
+                        }
+                    })
+            }
+            else {
+                for (let i = 0; i < result_cues.length; i++) {
+                    cues.push(result_cues[i]['content']);
+                }
+            }
             return res.status(200).json({
                 status: "SUCCESS",
                 task: result[0],
                 correct: false,
-                cues: [] // Cues to be in here
+                cues: cues
             })
         } else {
             return res.status(400).json({
