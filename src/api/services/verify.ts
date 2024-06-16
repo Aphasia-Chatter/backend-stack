@@ -50,6 +50,7 @@ export async function verify(req: Request, res: Response): Promise<Response> {
                  4. Return JSON containing the cues
             */
             const result_cues = await db.select().from(wordRetrievalTaskHint).where(eq(wordRetrievalTaskHint.taskID, word_retrieval_task_id));
+            const result_cues_all = await db.select().from(wordRetrievalTaskHint) // To get all the word_retrieval_task, as all IDs have to be unique
             const cues: any[] = [];
             if (result_cues.length < 5) {
                 // Generate cues using OpenAI GPT
@@ -79,8 +80,8 @@ export async function verify(req: Request, res: Response): Promise<Response> {
                         console.log(respose_cues);
                         for (let i = 0; i < respose_cues.length; i++) {
                             cues.push(respose_cues[i]); 
-                            console.log(i + result_cues.length - 1)
-                            insertWordRetrevialTaskHint(i + result_cues.length, word_retrieval_task_id, cues[i], "message");
+                            console.log(i + result_cues_all.length - 1);
+                            insertWordRetrevialTaskHint(i + result_cues_all.length, word_retrieval_task_id, cues[i], "message");
                         }
                     })
             }
