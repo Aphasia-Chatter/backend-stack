@@ -28,12 +28,17 @@ export async function verify(req: Request, res: Response): Promise<Response> {
         console.log(`Actual Answer: ${result[0]['answer']}`)
         
         if (result[0]['answer'] === user_answer) {
+            const response = await invoke(`
+                The target answer is ${result[0]['answer']}. Write a congratulatory message 
+                telling the user that he/she got the right answer, and give a short one sentence
+                description of the target answer.
+            `);
             return res.status(200).json({
                 status: "SUCCESS",
                 user_answer: user_answer,
                 task: result[0],
                 correct: true,
-                messages: []    // Response for correct answer
+                messages: response    // Response for correct answer
             })
         } else if (result[0]['answer'] != user_answer) {
             /*
