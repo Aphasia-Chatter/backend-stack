@@ -1,15 +1,10 @@
-import e, { Request, Response } from 'express';
-import fs from 'fs';
-import path from 'path';
-import { dirname } from 'path';
-import { fileURLToPath } from 'url';
+import { Request, Response } from 'express';
 import { db } from 'src/db';
 import { wordRetrievalTask, wordRetrievalTaskHint, wordRetrievalHintTypeEnum } from 'src/schema';
 import { eq } from 'drizzle-orm';
 import tokenizeAnswer from '../utils/languageProcessor/tokenizeAnswer';
 import invoke from '../utils/llm/invoke';
 import insertWordRetrevialTaskHint from '../repositories/insertWordRetrievalTaskHint';
-import { except } from 'drizzle-orm/mysql-core';
 
 export async function verify(req: Request, res: Response): Promise<Response> {
     const request = req.body;

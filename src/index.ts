@@ -1,5 +1,4 @@
-import express, { Request, Response } from 'express';
-import multer, { StorageEngine } from 'multer';
+import express from 'express';
 import fs from 'fs'
 
 import createDefaultStaffIfNoneExists from './api/utils/createDefaultStaffIfNoneExists';
@@ -10,8 +9,9 @@ import verifyRoutes from './api/routes/verifyRoutes';
 
 import path from 'path';
 import { dirname } from 'path';
-import { fileURLToPath } from 'url';
 import { WORD_RETREVIAL_TASK_ASSETS_DIRECTORY } from './api/config/directories';
+
+import generateCueRoutes from './api/routes/generateCueRoutes';
 
 const app = express();
 
@@ -26,6 +26,7 @@ const port = 3000;
 const requiredDirectories = ['audios', WORD_RETREVIAL_TASK_ASSETS_DIRECTORY];
 initalizeUploadDirectories(requiredDirectories);
 
+app.use('/api/generate-cue', generateCueRoutes);
 app.use('/api/staff', staffRoutes);
 app.use('/api/asr', asrRoutes)
 app.use('/api/verify', verifyRoutes)
