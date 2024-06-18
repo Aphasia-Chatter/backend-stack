@@ -34,7 +34,7 @@ router.post('/delete-account', (req: Request, res: Response) => {
 })
 
 // /api/patient/change_account_password
-router.post('/change_account_password', (req: Request, res: Response) => {
+router.post('/change-account-password', (req: Request, res: Response) => {
   changeAccountPassword(req, res, ChangeAccountPasswordType.PATIENT)
 })
 
