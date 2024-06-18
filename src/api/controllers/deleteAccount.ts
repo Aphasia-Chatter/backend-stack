@@ -14,20 +14,28 @@ export enum DeleteAccountType {
 
 interface DeleteAccountRequest {
     username: string;
-    password:  string;
     sessionToken: string;
+    password:  string;
 }
 
 export default async function deleteAccount(req: Request, res: Response, deleteAccountType: DeleteAccountType) {
     const jsonReq = req.body as Partial<DeleteAccountRequest>;
-    console.log("user:", jsonReq.username)
+    console.log("username:", jsonReq.username)
+    console.log("session:", jsonReq.sessionToken)
     console.log("pw:", jsonReq.password)
-    console.log("Session T:", jsonReq.sessionToken)
 
     if (!jsonReq.username) {
         return res.status(400).json({
             'status': 'MISSING_USERNAME',
             'message': 'username is missing in the request body field.',
+            'data': {}
+        });
+    }
+
+    if (!jsonReq.sessionToken) {
+        return res.status(400).json({
+            'status': 'MISSING_SESSION',
+            'message': 'session is missing in the request body field.',
             'data': {}
         });
     }
@@ -38,14 +46,6 @@ export default async function deleteAccount(req: Request, res: Response, deleteA
             'message': 'password is missing in the request body field.',
             'data': {}
         }); 
-    }
-
-    if (!jsonReq.sessionToken) {
-        return res.status(400).json({
-            'status': 'MISSING_SESSION',
-            'message': 'session is missing in the request body field.',
-            'data': {}
-        });
     }
 
     if (deleteAccountType == DeleteAccountType.STAFF) {
@@ -86,6 +86,7 @@ async function deleteAccountStaff(jsonReq: DeleteAccountRequest, res: Response) 
         }
         else {
             await deleteStaff(relatedStaff.staff.username, relatedStaff.staff.hashedPassword)
+
             return res.status(200).json({
                 'status': 'DELETE_ACCOUNT_SUCCESS',
                 'message': 'Patient deletion is successful!',
@@ -123,6 +124,7 @@ async function deleteAccountPatient(jsonReq: DeleteAccountRequest, res: Response
         }
         else {
             await deletePatient(relatedPatient.patient.username, relatedPatient.patient.hashedPassword)
+            
             return res.status(200).json({
                 'status': 'DELETE_ACCOUNT_SUCCESS',
                 'message': 'Patient deletion is successful',

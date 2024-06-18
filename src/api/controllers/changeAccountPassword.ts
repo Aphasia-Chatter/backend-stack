@@ -38,6 +38,13 @@ export default async function changeAccountPassword(req: Request, res: Response,
         });
     }
 
+    if (!jsonReq.sessionToken) {
+        return res.status(400).json({
+            'status': 'MISSING_SESSION',
+            'message': 'session is missing in the request body field.'
+        });
+    }
+
     if (!jsonReq.currentPassword) {
         return res.status(400).json({
             'status': 'MISSING_CURRENT_PASSWORD',
@@ -65,13 +72,6 @@ export default async function changeAccountPassword(req: Request, res: Response,
             'message': 'New Password and confirm new password in the request body fields do not match.',
             'data': {}
         }); 
-    }
-
-    if (!jsonReq.sessionToken) {
-        return res.status(400).json({
-            'status': 'MISSING_SESSION',
-            'message': 'session is missing in the request body field.'
-        });
     }
 
     if (changeAccountPasswordType == ChangeAccountPasswordType.STAFF) {
@@ -129,7 +129,8 @@ async function changeStaffAccountPassword(jsonReq: ChangeAccountPasswordRequest,
                 return res.status(200).json({
                     'status': 'CHANGE_ACCOUNT_PASSWORD_SUCCESS',
                     'message': 'Staff account password update is successful',
-                }); 
+                });
+                
             } catch (err) {
                 return res.status(400).json({
                     'status': 'HASHING_ERROR',
@@ -164,7 +165,7 @@ async function changePatientAccountPassword(jsonReq: ChangeAccountPasswordReques
         if (!(await validateHash(jsonReq.currentPassword, relatedPatient.patient.hashedPassword))) {
             return res.status(400).json({
                 'status': 'CHANGE_ACCOUNT_PASSWORD_FAILURE',
-                'message': 'Incorrect password! Unable to update patient account password.',
+                'message': 'Incorrect current password! Unable to update patient account password.',
             }); 
         }
         else {
