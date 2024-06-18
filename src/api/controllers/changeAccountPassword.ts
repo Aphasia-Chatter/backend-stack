@@ -7,8 +7,8 @@ import selectStaffByUsernameAndToken from '../repositories/selectStaffByUsername
 import selectPatientByUsernameAndToken from '../repositories/selectPatientByUsernameAndToken';
 import validateHash from '../utils/validateHash';
 import checkPasswordComplexity from '../utils/checkPasswordComplexity';
-import deleteAllPatientSessionTokenByUsername from '../repositories/deleteAllPatientSessionTokenByUsername';
-import deleteAllStaffSessionTokenByUsername from '../repositories/deleteAllStaffSessionTokenByUsername';
+import deleteAllPatientSessionToken from '../repositories/deleteAllPatientSessionToken';
+import deleteAllStaffSessionToken from '../repositories/deleteAllStaffSessionToken';
 
 export enum ChangeAccountPasswordType {
     STAFF,
@@ -124,11 +124,11 @@ async function changeStaffAccountPassword(jsonReq: ChangeAccountPasswordRequest,
                 await updateStaffPassword(relatedStaff.staff.username, staffHashedNewPassword)
                 
                 // Clear all staff active sessions
-                await deleteAllStaffSessionTokenByUsername(relatedStaff.staff.username)
+                await deleteAllStaffSessionToken(relatedStaff.staff.id)
 
                 return res.status(200).json({
                     'status': 'CHANGE_ACCOUNT_PASSWORD_SUCCESS',
-                    'message': 'Staff account password update is successful',
+                    'message': 'Staff account password update is successful. You will be logged out now.',
                 });
                 
             } catch (err) {
@@ -181,11 +181,11 @@ async function changePatientAccountPassword(jsonReq: ChangeAccountPasswordReques
                 await updatePatientPassword(relatedPatient.patient.username, patientHashedNewPassword)
 
                 // Clear all patient active sessions
-                await deleteAllPatientSessionTokenByUsername(relatedPatient.patient.username)
+                await deleteAllPatientSessionToken(relatedPatient.patient.id)
 
                 return res.status(200).json({
                     'status': 'CHANGE_ACCOUNT_PASSWORD_SUCCESS',
-                    'message': 'Patient account password update is successful',
+                    'message': 'Patient account password update is successful. You will be logged out now.',
                 }); 
             } catch (err) {
                 return res.status(400).json({

@@ -63,6 +63,7 @@ async function logoutStaff(jsonReq: LogoutRequest, res: Response) {
 
     try {    
         await deleteStaffSessionToken(relatedUser.staff.id, relatedUser.staff_session_token.token)
+        
         return res.status(200).json({
             'status': 'SUCCESS',
             'message': 'Staff Logout successful, deleted the session token!',
@@ -93,6 +94,7 @@ async function logoutPatient(jsonReq: LogoutRequest, res: Response) {
 
     try {    
         await deletePatientSessionToken(relatedUser.patient.id, relatedUser.patient_session_token.token)
+
         return res.status(200).json({
             'status': 'SUCCESS',
             'message': 'Patient Logout successful, deleted the session token!',

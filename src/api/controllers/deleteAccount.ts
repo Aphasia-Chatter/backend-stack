@@ -89,7 +89,7 @@ async function deleteAccountStaff(jsonReq: DeleteAccountRequest, res: Response) 
 
             return res.status(200).json({
                 'status': 'DELETE_ACCOUNT_SUCCESS',
-                'message': 'Patient deletion is successful!',
+                'message': 'Patient deletion is successful. You will be logged out now.',
             }); 
         }
       } catch (err) {
@@ -127,7 +127,7 @@ async function deleteAccountPatient(jsonReq: DeleteAccountRequest, res: Response
             
             return res.status(200).json({
                 'status': 'DELETE_ACCOUNT_SUCCESS',
-                'message': 'Patient deletion is successful',
+                'message': 'Patient deletion is successful. You will be logged out now.',
             }); 
         }
       } catch (err) {
