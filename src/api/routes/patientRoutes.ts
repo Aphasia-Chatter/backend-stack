@@ -1,10 +1,11 @@
 import { Router, Request, Response } from 'express';
+
 import login, { LoginType } from '../controllers/login';
 import register, { RegisterType } from '../controllers/register';
 import logout, { LogoutType } from '../controllers/logout';
 import deleteAccount, { DeleteAccountType } from '../controllers/deleteAccount';
 import changeAccountPassword, { ChangeAccountPasswordType } from '../controllers/changeAccountPassword';
-import checkToken from '../controllers/checkToken';
+import checkToken from '../controllers/staff/checkToken';
 
 const router: Router = Router();
 
