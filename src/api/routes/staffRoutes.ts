@@ -4,8 +4,14 @@ import { v4 as uuidv4 } from 'uuid';
 
 import createTask, { TaskType } from '../controllers/staff/taskCreation/createTask';
 import { WORD_RETREVIAL_TASK_ASSETS_DIRECTORY } from '../config/directories';
-import checkToken from '../controllers/staff/checkToken';
+
 import login, { LoginType } from '../controllers/login';
+import register, { RegisterType } from '../controllers/register';
+import logout, { LogoutType } from '../controllers/logout';
+import deleteAccount, { DeleteAccountType } from '../controllers/deleteAccount';
+import changeAccountPassword, { ChangeAccountPasswordType } from '../controllers/changeAccountPassword';
+import checkToken from '../controllers/staff/checkToken';
+
 import { multerImagefileFilter } from '../utils/multerImageFileFilter';
 import configureTask from '../controllers/staff/taskConfigure/configureTask';
 import getTask from '../controllers/staff/taskGetter/getTask';
@@ -34,6 +40,25 @@ const wordRetrevialTaskstorage = multer.diskStorage({
 	}
 });
 
+// /api/staff/register
+router.post('/register', (req: Request, res: Response) => {
+  register(req, res, RegisterType.STAFF)
+})
+
+// /api/staff/logout
+router.post('/logout', (req: Request, res: Response) => {
+  logout(req, res, LogoutType.STAFF)
+})
+
+// /api/staff/delete_account
+router.post('/delete-account', (req: Request, res: Response) => {
+  deleteAccount(req, res, DeleteAccountType.STAFF)
+})
+
+// /api/staff/change_account_password
+router.post('/change-account-password', (req: Request, res: Response) => {
+  changeAccountPassword(req, res, ChangeAccountPasswordType.STAFF)
+})
 
 router.post('/create-word-retrevial-task', multer({ storage: wordRetrevialTaskstorage, fileFilter: multerImagefileFilter }).single('image'), (req: Request, res: Response) => {
 	createTask(req, res, TaskType.WORD_RETREVIAL)
