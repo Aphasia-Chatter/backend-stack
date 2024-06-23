@@ -4,6 +4,7 @@ import fs from 'fs'
 import createDefaultStaffIfNoneExists from './api/utils/createDefaultStaffIfNoneExists';
 import insertLog from './api/repositories/insertLog';
 import staffRoutes from './api/routes/staffRoutes';
+import patientRoutes from './api/routes/patientRoutes';
 import asrRoutes from './api/routes/asrRoutes';
 import verifyRoutes from './api/routes/verifyRoutes';
 
@@ -28,6 +29,7 @@ initalizeUploadDirectories(requiredDirectories);
 
 app.use('/api/generate-cue', generateCueRoutes);
 app.use('/api/staff', staffRoutes);
+app.use('/api/patient', patientRoutes);
 app.use('/api/asr', asrRoutes)
 app.use('/api/verify', verifyRoutes)
 

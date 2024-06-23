@@ -29,12 +29,12 @@ router.post('/logout', (req: Request, res: Response) => {
   logout(req, res, LogoutType.PATIENT)
 })
 
-// /api/patient/delete_account
+// /api/patient/delete-account
 router.post('/delete-account', (req: Request, res: Response) => {
   deleteAccount(req, res, DeleteAccountType.PATIENT)
 })
 
-// /api/patient/change_account_password
+// /api/patient/change-account-password
 router.post('/change-account-password', (req: Request, res: Response) => {
   changeAccountPassword(req, res, ChangeAccountPasswordType.PATIENT)
 })

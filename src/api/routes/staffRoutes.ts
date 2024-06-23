@@ -50,12 +50,12 @@ router.post('/logout', (req: Request, res: Response) => {
   logout(req, res, LogoutType.STAFF)
 })
 
-// /api/staff/delete_account
+// /api/staff/delete-account
 router.post('/delete-account', (req: Request, res: Response) => {
   deleteAccount(req, res, DeleteAccountType.STAFF)
 })
 
-// /api/staff/change_account_password
+// /api/staff/change-account-password
 router.post('/change-account-password', (req: Request, res: Response) => {
   changeAccountPassword(req, res, ChangeAccountPasswordType.STAFF)
 })
