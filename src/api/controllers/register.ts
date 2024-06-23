@@ -5,6 +5,7 @@ import insertStaff from "../repositories/insertStaff";
 import insertPatient from "../repositories/insertPatient";
 import selectStaffByUsername from '../repositories/selectStaffByUsername';
 import selectPatientByUsername from '../repositories/selectPatientByUsername';
+import selectEnrolmentCodeByUsernameAndCode from '../repositories/selectEnrolmentCodeByUsernameAndCode';
 import insertLog from '../repositories/insertLog';
 
 export enum RegisterType {
@@ -59,7 +60,6 @@ export default async function register(req: Request, res: Response, registerType
     }
 
     else if (registerType == RegisterType.PATIENT) {
-        // Do not check enrolment code for now, so that patient can register freely
         if (!jsonReq.enrolmentCode) {
             return res.status(400).json({
                 'status': 'MISSING_ENROLMENT_CODE',
@@ -118,10 +118,8 @@ async function registerStaff(jsonReq: RegisterRequest, res: Response) {
 }
 
 async function registerPatient(jsonReq: RegisterRequest, res: Response) {
-    // Check if there is an existing staff account with the username
+    // Check if there is an existing patient account with the username
     const result = await selectPatientByUsername(jsonReq.username)
-    console.log("Hello::: " + result.length)
-
     if (result.length > 0) {
         return res.status(400).json({
             'status': 'BAD_USERNAME',
@@ -129,29 +127,37 @@ async function registerPatient(jsonReq: RegisterRequest, res: Response) {
             'data': {}
         }); 
     }
-    
-    // Username does not exist. Able to register for a patient account
-    else {
-        // Hash and pepper patient password
-        let hashedPassword = ""
-        try {
-            const patientPassword = jsonReq.confirmPassword
-            const hashPepper = process.env.HASHING_PEPPER
-            hashedPassword = await argon2.hash(patientPassword + hashPepper);
-        } catch (err) {
-            await insertLog(`Failed to create patient user due to hashing issues :: ${err}`, "CRITICAL")
-            return res.status(400).json({
-                'status': 'HASHING_ERROR',
-                'message': 'Failed to create patient user due to hashing issues.'
-            }); 
-        }
 
-        // Create patient account in the database
-        const patientUsername = jsonReq.username
-        await insertPatient(patientUsername, hashedPassword)
-        return res.status(201).json({
-            status: 'REGISTRATION SUCCESS',
-            message: 'Patient account registered successfully',
-          });
+    // Check if there is an existing patient account with the username
+    const result2 = await selectEnrolmentCodeByUsernameAndCode(jsonReq.username, jsonReq.enrolmentCode)
+    if (result2.length == 0) {
+        return res.status(400).json({
+            'status': 'BAD_USERNAME_AND_CODE',
+            'message': 'Please check that your username and enrolment code is correct.',
+            'data': {}
+        }); 
     }
+    
+    // Username does not exist and enrolment exist. Able to register for a patient account
+    // Hash and pepper patient password
+    let hashedPassword = ""
+    try {
+        const patientPassword = jsonReq.confirmPassword
+        const hashPepper = process.env.HASHING_PEPPER
+        hashedPassword = await argon2.hash(patientPassword + hashPepper);
+    } catch (err) {
+        await insertLog(`Failed to create patient user due to hashing issues :: ${err}`, "CRITICAL")
+        return res.status(400).json({
+            'status': 'HASHING_ERROR',
+            'message': 'Failed to create patient user due to hashing issues.'
+        }); 
+    }
+
+    // Create patient account in the database
+    const patientUsername = jsonReq.username
+    await insertPatient(patientUsername, hashedPassword)
+    return res.status(201).json({
+        status: 'REGISTRATION SUCCESS',
+        message: 'Patient account registered successfully',
+        });
 }

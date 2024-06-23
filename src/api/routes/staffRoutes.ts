@@ -16,6 +16,8 @@ import { multerImagefileFilter } from '../utils/multerImageFileFilter';
 import configureTask from '../controllers/staff/taskConfigure/configureTask';
 import getTask from '../controllers/staff/taskGetter/getTask';
 
+import createEnrolmentCode from '../controllers/staff/createEnrolmentCode'
+
 const router: Router = Router();
 
 // /api/staff/login
@@ -60,6 +62,11 @@ router.post('/change-account-password', (req: Request, res: Response) => {
   changeAccountPassword(req, res, ChangeAccountPasswordType.STAFF)
 })
 
+// /api/staff/create-enrolment-code
+router.post('/create-enrolment-code', (req: Request, res: Response) => {
+	createEnrolmentCode(req, res)
+})
+
 router.post('/create-word-retrevial-task', multer({ storage: wordRetrevialTaskstorage, fileFilter: multerImagefileFilter }).single('image'), (req: Request, res: Response) => {
 	createTask(req, res, TaskType.WORD_RETREVIAL)
 })
@@ -71,6 +78,7 @@ router.put('/modify-word-retrevial-task', multer({ storage: wordRetrevialTasksto
 router.get('/get-word-retrevial-task', (req: Request, res: Response) => {
 	getTask(req, res, TaskType.WORD_RETREVIAL)
 })
+
 //#endregion
 
 export default router;
