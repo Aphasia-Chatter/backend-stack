@@ -54,20 +54,20 @@ export default async function register(req: Request, res: Response, registerType
         }); 
     }
 
-    // Do not check enrolment code for now, so that patient can register freely
-    if (!jsonReq.enrolmentCode) {
-        return res.status(400).json({
-            'status': 'MISSING_ENROLMENT_CODE',
-            'message': 'Enrolment code is missing in the request body field.',
-            'data': {}
-        }); 
-    }
-
     if (registerType == RegisterType.STAFF) {
         await registerStaff(jsonReq as RegisterRequest, res)
     }
 
     else if (registerType == RegisterType.PATIENT) {
+        // Do not check enrolment code for now, so that patient can register freely
+        if (!jsonReq.enrolmentCode) {
+            return res.status(400).json({
+                'status': 'MISSING_ENROLMENT_CODE',
+                'message': 'Enrolment code is missing in the request body field.',
+                'data': {}
+            }); 
+        }
+
         await registerPatient(jsonReq as RegisterRequest, res)
     }
     

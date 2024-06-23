@@ -90,7 +90,7 @@ async function loginStaff(jsonReq: LoginRequest, req: Request, res: Response) {
             'message': 'Login successful, save the session token inside data!',
             'data': {
                 'username': jsonReq.username,
-                'session_token': hashedToken
+                'sessionToken': hashedToken
             }
         }); 
       } catch (err) {
