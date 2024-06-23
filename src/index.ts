@@ -13,6 +13,7 @@ import { dirname } from 'path';
 import { WORD_RETREVIAL_TASK_ASSETS_DIRECTORY } from './api/config/directories';
 
 import generateCueRoutes from './api/routes/generateCueRoutes';
+import cors from 'cors'
 
 const app = express();
 
@@ -20,6 +21,8 @@ const app = express();
 	Middleware that converts the body of any request to 
 	JSON format.
 */
+
+app.use(cors());
 app.use(express.json()); 
 
 const port = 3000;

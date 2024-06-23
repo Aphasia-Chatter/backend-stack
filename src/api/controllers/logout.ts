@@ -80,8 +80,6 @@ async function logoutStaff(jsonReq: LogoutRequest, res: Response) {
 // Patient Logout Function
 async function logoutPatient(jsonReq: LogoutRequest, res: Response) {
     const result = await selectPatientByUsernameAndToken(jsonReq.username, jsonReq.sessionToken)
-    console.log("Hello::: ", result.length)
-
     if (result.length <= 0) {
         return res.status(400).json({
             'status': 'BAD_USERNAME',
