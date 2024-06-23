@@ -16,6 +16,7 @@ import { multerImagefileFilter } from '../utils/multerImageFileFilter';
 import configureTask from '../controllers/staff/taskConfigure/configureTask';
 import getTask from '../controllers/staff/taskGetter/getTask';
 
+import getAllEnrolmentCodes from '../controllers/staff/getAllEnrolmentCodes';
 import createEnrolmentCode from '../controllers/staff/createEnrolmentCode'
 
 const router: Router = Router();
@@ -60,6 +61,11 @@ router.post('/delete-account', (req: Request, res: Response) => {
 // /api/staff/change-account-password
 router.post('/change-account-password', (req: Request, res: Response) => {
   changeAccountPassword(req, res, ChangeAccountPasswordType.STAFF)
+})
+
+// /api/staff/get-all-enrolment-codes
+router.get('/get-all-enrolment-codes', async (req: Request, res: Response) => {
+	getAllEnrolmentCodes(req, res)
 })
 
 // /api/staff/create-enrolment-code
