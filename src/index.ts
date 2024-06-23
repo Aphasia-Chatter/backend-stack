@@ -1,28 +1,40 @@
-import express, { Request, Response } from 'express';
-import cors from 'cors';
+import express from 'express';
+import fs from 'fs'
 
 import createDefaultStaffIfNoneExists from './api/utils/createDefaultStaffIfNoneExists';
 import insertLog from './api/repositories/insertLog';
 import staffRoutes from './api/routes/staffRoutes';
+import patientRoutes from './api/routes/patientRoutes';
+import asrRoutes from './api/routes/asrRoutes';
+import verifyRoutes from './api/routes/verifyRoutes';
+
+import path from 'path';
+import { dirname } from 'path';
+import { WORD_RETREVIAL_TASK_ASSETS_DIRECTORY } from './api/config/directories';
+
+import generateCueRoutes from './api/routes/generateCueRoutes';
+import cors from 'cors'
 
 const app = express();
+
+/*
+	Middleware that converts the body of any request to 
+	JSON format.
+*/
+
+app.use(cors());
+app.use(express.json()); 
+
 const port = 3000;
 
-// Added to resolve CORS issue
-const corsOptions = {
-	origin: "http://localhost:8081"
-};
+const requiredDirectories = ['audios', WORD_RETREVIAL_TASK_ASSETS_DIRECTORY];
+initalizeUploadDirectories(requiredDirectories);
 
-app.use(cors(corsOptions));
-
-app.use(express.json());
-
+app.use('/api/generate-cue', generateCueRoutes);
 app.use('/api/staff', staffRoutes);
-
-
-app.get('/api/ping', (req, res) => {
-	res.send('Pong!');
-  });
+app.use('/api/patient', patientRoutes);
+app.use('/api/asr', asrRoutes)
+app.use('/api/verify', verifyRoutes)
 
 app.listen(port, () => {
 	console.log(`Server is running on port ${port}`);
@@ -31,3 +43,20 @@ app.listen(port, () => {
         insertLog(`Failed to create default staff user :: ${err}`, "CRITICAL")
 	})
 });
+
+
+/**
+ * Initializes the specified directories if they do not already exist.
+ *
+ * @param {string[]} directories - An array of directory paths to initialize.
+ */
+function initalizeUploadDirectories(directories: string[]) {
+	const __dirname = dirname('');
+	
+	for (const directory of directories) {
+		const uploadDir = path.join(__dirname, directory);
+		if (!fs.existsSync(uploadDir)) {
+			fs.mkdirSync(uploadDir);
+		}
+	}
+}

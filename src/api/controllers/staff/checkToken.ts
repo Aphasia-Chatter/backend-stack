@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
-import selectStaffByUsername from '../repositories/selectStaffByUsername';
-import fetchAllStaffTokens from '../repositories/fetchAllStaffToken';
-import validateHash from '../utils/validateHash';
-import decryptClientInformation from '../utils/decryptClientInformation';
+import selectStaffByUsername from '../../repositories/selectStaffByUsername';
+import fetchAllStaffTokens from '../../repositories/fetchAllStaffToken';
+import validateHash from '../../utils/validateHash';
+import decryptClientInformation from '../../utils/decryptClientInformation';
 
 import utf8Enc from 'crypto-js/enc-utf8';
 
