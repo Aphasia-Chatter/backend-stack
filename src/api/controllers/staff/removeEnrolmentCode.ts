@@ -1,19 +1,18 @@
 import { Request, Response } from 'express';
 
 import selectStaffByUsernameAndToken from '../../repositories/selectStaffByUsernameAndToken';
-import insertEnrolmentCode from 'src/api/repositories/insertEnrolmentCode';
-import selectPatientByUsername from 'src/api/repositories/selectPatientByUsername';
-import selectEnrolmentCodeByUsername from 'src/api/repositories/selectEnrolmentCodeByUsername';
-import generateRandomString from 'src/api/utils/generateRandomString';
+import deleteEnrolmentCode from 'src/api/repositories/deleteEnrolmentCode';
+import selectEnrolmentCodeByUsernameAndCode from 'src/api/repositories/selectEnrolmentCodeByUsernameAndCode';
 
-interface CreateEnrolmentCodeRequest {
+interface RemoveEnrolmentCodeRequest {
     username: string;
     sessionToken: string;
-    patientDesiredUsername: string;
+    selectedPatientDesiredUsername: string;
+    selectedPatientEnrolmentCode: string;
 }
 
-export default async function createEnrolmentCode(req: Request, res: Response) {
-    const jsonReq = req.body as Partial<CreateEnrolmentCodeRequest>;
+export default async function removeEnrolmentCode(req: Request, res: Response) {
+    const jsonReq = req.body as Partial<RemoveEnrolmentCodeRequest>;
 
     if (!jsonReq.username) {
         return res.status(400).json({
@@ -31,9 +30,17 @@ export default async function createEnrolmentCode(req: Request, res: Response) {
         });
     }
 
-    if (!jsonReq.patientDesiredUsername) {
+    if (!jsonReq.selectedPatientDesiredUsername) {
         return res.status(400).json({
             'status': 'MISSING_USERNAME',
+            'message': 'desired username is missing in the request body field.',
+            'data': {}
+        });
+    }
+
+    if (!jsonReq.selectedPatientEnrolmentCode) {
+        return res.status(400).json({
+            'status': 'MISSING_ENROLMENT_CODE',
             'message': 'desired username is missing in the request body field.',
             'data': {}
         });
@@ -48,37 +55,23 @@ export default async function createEnrolmentCode(req: Request, res: Response) {
             'data': {}
         }); 
     }
-
     const relatedUser = result[0]
 
     try {
-        // Check if there is an existing patient account with the username
-        const result2 = await selectPatientByUsername(jsonReq.patientDesiredUsername)
-        if (result2.length > 0) {
-            return res.status(400).json({
-                'status': 'BAD_USERNAME',
-                'message': 'Username already exist. Please change into another username!',
-                'data': {}
-            }); 
-        }
-
-        let randomCode = '';
-
         // Check if an enrolment code already exist for the desired username
-        const result = await selectEnrolmentCodeByUsername(jsonReq.patientDesiredUsername)
-        if (result.length > 0) {
+        const result2 = await selectEnrolmentCodeByUsernameAndCode(jsonReq.selectedPatientDesiredUsername, jsonReq.selectedPatientEnrolmentCode)
+        if (result2.length == 0) {
             return res.status(400).json({
                 'status': 'BAD_USERNAME',
-                'message': 'Username already exist. Please choose another username!',
+                'message': 'Please check that enrolment code for the user exist.',
                 'data': {}
-            }); 
+            });
+
         } else {
-            // If not exist, generate a random code for the username
-            randomCode = generateRandomString();
-            await insertEnrolmentCode(relatedUser.staff.id, jsonReq.patientDesiredUsername, randomCode)
+            await deleteEnrolmentCode(relatedUser.staff.id, jsonReq.selectedPatientDesiredUsername, jsonReq.selectedPatientEnrolmentCode)
             return res.status(200).json({
                 'status': 'SUCCESS',
-                'message': `A new enrolment code is created for patient ${jsonReq.patientDesiredUsername}. The code is ${randomCode}`,
+                'message': 'The code has been successfully deleted for the user.',
             });
         }
     } catch (err) {

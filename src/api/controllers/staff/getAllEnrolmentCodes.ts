@@ -12,9 +12,6 @@ export default async function getAllEnrolmentCodes(req: Request, res: Response) 
     const jsonReq = req.body as Partial<GetAllEnrolmentCodeRequest>;
     const { username, sessionToken } = req.query;
 
-    console.log("username:", username)
-    console.log("session:", sessionToken)
-
     if (!username) {
         return res.status(400).json({
             'status': 'MISSING_USERNAME',
@@ -45,7 +42,8 @@ export default async function getAllEnrolmentCodes(req: Request, res: Response) 
 
     try {
         const enrollmentCodes = await fetchAllEnrolmentCodeByStaffID(relatedUser.staff.id);
-        if (enrollmentCodes.length > 0) {
+
+        if (enrollmentCodes) {
             // A list of enrolment code found
             return res.status(200).json({
                 'status': 'SUCCESS',

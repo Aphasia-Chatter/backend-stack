@@ -18,6 +18,7 @@ import getTask from '../controllers/staff/taskGetter/getTask';
 
 import getAllEnrolmentCodes from '../controllers/staff/getAllEnrolmentCodes';
 import createEnrolmentCode from '../controllers/staff/createEnrolmentCode'
+import removeEnrolmentCode from '../controllers/staff/removeEnrolmentCode';
 
 const router: Router = Router();
 
@@ -71,6 +72,11 @@ router.get('/get-all-enrolment-codes', async (req: Request, res: Response) => {
 // /api/staff/create-enrolment-code
 router.post('/create-enrolment-code', (req: Request, res: Response) => {
 	createEnrolmentCode(req, res)
+})
+
+// /api/staff/remove-existing-enrolment-code
+router.post('/remove-existing-enrolment-code', (req: Request, res: Response) => {
+	removeEnrolmentCode(req, res)
 })
 
 router.post('/create-word-retrevial-task', multer({ storage: wordRetrevialTaskstorage, fileFilter: multerImagefileFilter }).single('image'), (req: Request, res: Response) => {

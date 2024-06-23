@@ -5,5 +5,5 @@ import { eq } from "drizzle-orm";
 export default async function selectEnrolmentCodeByUsername(patientUsername: string) {
     return await db.select()
         .from(enrollmentCode)
-        .where(eq(enrollmentCode.code , patientUsername));
+        .where(eq(enrollmentCode.patientUsername , patientUsername));
 }

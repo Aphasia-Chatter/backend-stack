@@ -7,6 +7,7 @@ import selectStaffByUsername from '../repositories/selectStaffByUsername';
 import selectPatientByUsername from '../repositories/selectPatientByUsername';
 import selectEnrolmentCodeByUsernameAndCode from '../repositories/selectEnrolmentCodeByUsernameAndCode';
 import insertLog from '../repositories/insertLog';
+import deleteEnrolmentCodeByUsername from '../repositories/deleteEnrolmentCodeByUsername';
 
 export enum RegisterType {
     STAFF,
@@ -128,7 +129,7 @@ async function registerPatient(jsonReq: RegisterRequest, res: Response) {
         }); 
     }
 
-    // Check if there is an existing patient account with the username
+    // Check if the username and code is valid
     const result2 = await selectEnrolmentCodeByUsernameAndCode(jsonReq.username, jsonReq.enrolmentCode)
     if (result2.length == 0) {
         return res.status(400).json({
@@ -145,6 +146,19 @@ async function registerPatient(jsonReq: RegisterRequest, res: Response) {
         const patientPassword = jsonReq.confirmPassword
         const hashPepper = process.env.HASHING_PEPPER
         hashedPassword = await argon2.hash(patientPassword + hashPepper);
+
+        // Create patient account in the database
+        const patientUsername = jsonReq.username
+        await insertPatient(patientUsername, hashedPassword)
+
+        // Delete the enrolment code from the database after patient registration (either this or set status is Used or sth)
+        await deleteEnrolmentCodeByUsername(patientUsername, jsonReq.enrolmentCode)
+
+        return res.status(201).json({
+            status: 'REGISTRATION SUCCESS',
+            message: 'Patient account registered successfully',
+            });
+
     } catch (err) {
         await insertLog(`Failed to create patient user due to hashing issues :: ${err}`, "CRITICAL")
         return res.status(400).json({
@@ -152,12 +166,4 @@ async function registerPatient(jsonReq: RegisterRequest, res: Response) {
             'message': 'Failed to create patient user due to hashing issues.'
         }); 
     }
-
-    // Create patient account in the database
-    const patientUsername = jsonReq.username
-    await insertPatient(patientUsername, hashedPassword)
-    return res.status(201).json({
-        status: 'REGISTRATION SUCCESS',
-        message: 'Patient account registered successfully',
-        });
 }
