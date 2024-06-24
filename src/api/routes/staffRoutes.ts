@@ -20,6 +20,8 @@ import getAllEnrolmentCodes from '../controllers/staff/getAllEnrolmentCodes';
 import createEnrolmentCode from '../controllers/staff/createEnrolmentCode'
 import removeEnrolmentCode from '../controllers/staff/removeEnrolmentCode';
 
+import selectPatientByUsername from '../repositories/selectPatientByUsername';
+
 const router: Router = Router();
 
 // /api/staff/login
@@ -90,6 +92,26 @@ router.put('/modify-word-retrevial-task', multer({ storage: wordRetrevialTasksto
 router.get('/get-word-retrevial-task', (req: Request, res: Response) => {
 	getTask(req, res, TaskType.WORD_RETREVIAL)
 })
+
+// /api/staff/search?username=xxx
+router.get('/search', async (req: Request, res: Response) => {
+    const { username } = req.query;
+
+  if (!username || typeof username !== 'string') {
+    return res.status(400).send({ error: 'Username is required and must be a string' });
+  }
+
+  try {
+    const patient = await selectPatientByUsername(username);
+    if (patient.length === 0) {
+      return res.status(404).send({ error: 'Patient not found' });
+    }
+    res.status(200).send(patient);
+  } catch (error) {
+    res.status(500).send({ error: 'An error occurred while fetching the patient' });
+  }
+  });
+
 
 //#endregion
 
