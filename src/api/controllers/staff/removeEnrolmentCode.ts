@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
 
-import selectStaffByUsernameAndToken from '../../repositories/selectStaffByUsernameAndToken';
 import deleteEnrolmentCode from 'src/api/repositories/deleteEnrolmentCode';
 import selectEnrolmentCodeByUsernameAndCode from 'src/api/repositories/selectEnrolmentCodeByUsernameAndCode';
+import validateStaffRequest from 'src/api/utils/validateStaffRequest';
 
 interface RemoveEnrolmentCodeRequest {
     username: string;
@@ -46,16 +46,17 @@ export default async function removeEnrolmentCode(req: Request, res: Response) {
         });
     }
 
-    const result = await selectStaffByUsernameAndToken(jsonReq.username, jsonReq.sessionToken)
+    const validationResult = await validateStaffRequest(req, jsonReq.username)
 
-    if (result.length <= 0) {
-        return res.status(400).json({
-            'status': 'BAD_USERNAME',
-            'message': 'User does not exist!',
+    if (!validationResult.isValid) {
+        return res.status(401).json({
+            'status': validationResult.status,
+            'message': validationResult.message,
             'data': {}
-        }); 
+        })
     }
-    const relatedUser = result[0]
+
+    const relatedUser = validationResult.staff!
 
     try {
         // Check if an enrolment code already exist for the desired username
@@ -68,7 +69,7 @@ export default async function removeEnrolmentCode(req: Request, res: Response) {
             });
 
         } else {
-            await deleteEnrolmentCode(relatedUser.staff.id, jsonReq.selectedPatientDesiredUsername, jsonReq.selectedPatientEnrolmentCode)
+            await deleteEnrolmentCode(relatedUser.id, jsonReq.selectedPatientDesiredUsername, jsonReq.selectedPatientEnrolmentCode)
             return res.status(200).json({
                 'status': 'SUCCESS',
                 'message': 'The code has been successfully deleted for the user.',

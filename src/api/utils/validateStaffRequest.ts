@@ -24,6 +24,7 @@ interface ValidationResult {
         id: string;
         username: string;
         hashedPassword: string;
+        hashedToken: string;
     } | null;
 }
 
@@ -35,7 +36,7 @@ interface ValidationResult {
  * @return {Promise<ValidationResult>} A promise that resolves to a ValidationResult object indicating the validation status.
  */
 export default async function validateStaffRequest(request: Request, userName: string): Promise<ValidationResult> {
-    const sessionToken = request.headers['session-token'] as string;
+    const sessionToken = request.headers['session-token'] as string ?? request.body['sessionToken'] as string ?? request.query['sessionToken'] as string;
     if (!sessionToken.trim()) {
         return {
             isValid: false,
@@ -92,7 +93,12 @@ export default async function validateStaffRequest(request: Request, userName: s
             isValid: true,
             status: "SUCCESS",
             message: "Session token is valid!",
-            staff: relatedStaff
+            staff: {
+                id: relatedStaff.id,
+                username: relatedStaff.username,
+                hashedPassword: relatedStaff.hashedPassword,
+                hashedToken: staffToken.token
+            },
         };
     }
 

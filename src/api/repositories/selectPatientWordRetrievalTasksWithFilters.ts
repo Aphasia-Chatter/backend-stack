@@ -85,9 +85,9 @@ export default async function selectPatientWordRetrievalTasksWithFilters(
       name: row.task.name,
       author: row.staff.username,
       status: rowStatus,
-      created_at: row.task.createdAt,
-      last_session_at: row.word_retrieval_session?.startedAt,
-      last_completed_at: row.word_retrieval_session?.completedAt,
+      createdAt: row.task.createdAt,
+      lastSessionAt: row.word_retrieval_session?.startedAt,
+      lastCompletedAt: row.word_retrieval_session?.completedAt,
     });
   }
 
