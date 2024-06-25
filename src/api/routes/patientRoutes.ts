@@ -6,6 +6,7 @@ import logout, { LogoutType } from '../controllers/logout';
 import deleteAccount, { DeleteAccountType } from '../controllers/deleteAccount';
 import changeAccountPassword, { ChangeAccountPasswordType } from '../controllers/changeAccountPassword';
 import checkToken from '../controllers/staff/checkToken';
+import getPatientWordRetrievalTasks from '../controllers/patient/getPatientWordRetrievalTasks';
 
 const router: Router = Router();
 
@@ -37,6 +38,12 @@ router.post('/delete-account', (req: Request, res: Response) => {
 // /api/patient/change-account-password
 router.post('/change-account-password', (req: Request, res: Response) => {
   changeAccountPassword(req, res, ChangeAccountPasswordType.PATIENT)
+})
+
+router.post('/get-tasks', async (req: Request, res: Response) => {
+  const response = await getPatientWordRetrievalTasks(req, res)
+  // TODO: Expand to fetch the other tasks as well once they are implemented...
+  res.status(200).json(response)
 })
 
 export default router;

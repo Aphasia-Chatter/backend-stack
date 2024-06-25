@@ -4,6 +4,13 @@ import fs from 'fs';
 import getStaffWordRetrevialTasks from 'src/api/repositories/getStaffWordRetrevialTasks';
 import insertLog from 'src/api/repositories/insertLog';
 
+/**
+ * For staff usage; See `getPatientWordRetrevialTasks` for fetching as a patient.
+ * @param req 
+ * @param res 
+ * @param staff 
+ * @returns 
+ */
 export async function getWordRetrevialTasks(
     req: Request,
     res: Response,

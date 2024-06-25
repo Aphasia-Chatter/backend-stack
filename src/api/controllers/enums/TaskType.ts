@@ -1,5 +1,5 @@
 export enum TaskType {
-    WORD_RETRIEVAL = "word_retrieval",
-    SENTENCE_COMPLETION = "sentence_completion",
-    ARTICLE_READING = "article_reading"
+    WORD_RETRIEVAL = "WORD_RETRIEVAL",
+    SENTENCE_COMPLETION = "SENTENCE_COMPLETION",
+    ARTICLE_READING = "ARTICLE_READING",
 }
