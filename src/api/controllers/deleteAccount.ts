@@ -2,10 +2,10 @@ import { Request, Response } from 'express';
 
 import deleteStaff from '../repositories/deleteStaff';
 import deletePatient from '../repositories/deletePatient';
-import selectStaffByUsernameAndToken from '../repositories/selectStaffByUsernameAndToken';
 import selectPatientByUsernameAndToken from '../repositories/selectPatientByUsernameAndToken';
 import validateHash from '../utils/validateHash';
-
+import deletePatientStaffRelationshipByPatientID from '../repositories/deletePatientStaffRelationshipByPatientID';
+import validateStaffRequest from '../utils/validateStaffRequest';
 
 export enum DeleteAccountType {
     STAFF,
@@ -49,7 +49,7 @@ export default async function deleteAccount(req: Request, res: Response, deleteA
     }
 
     if (deleteAccountType == DeleteAccountType.STAFF) {
-        await deleteAccountStaff(jsonReq as DeleteAccountRequest, res)
+        await deleteAccountStaff(jsonReq as DeleteAccountRequest, req, res)
     }
     else if (deleteAccountType == DeleteAccountType.PATIENT) {
         await deleteAccountPatient(jsonReq as DeleteAccountRequest, res)
@@ -63,21 +63,23 @@ export default async function deleteAccount(req: Request, res: Response, deleteA
 }
 
 // Staff Delete Account Function
-async function deleteAccountStaff(jsonReq: DeleteAccountRequest, res: Response) {
+async function deleteAccountStaff(jsonReq: DeleteAccountRequest, req: Request, res: Response) {
     // Check if staff with session exists
-    const result = await selectStaffByUsernameAndToken(jsonReq.username, jsonReq.sessionToken)
-    if (result.length <= 0) {
-        return res.status(400).json({
-            'status': 'BAD_STAFF_ACCOUNT',
-            'message': 'User does not exist!'
-        }); 
+    const validationResult = await validateStaffRequest(req, jsonReq.username)
+    if (!validationResult.isValid) {
+        return res.status(401).json({
+            'status': validationResult.status,
+            'message': validationResult.message,
+            'data': {}
+        })
     }
 
-    const relatedStaff = result[0]
-    
+    const relatedUser = validationResult.staff!
+
+
     try {
         // Check for password hash
-        if (!(await validateHash(jsonReq.password, relatedStaff.staff.hashedPassword))) {
+        if (!(await validateHash(jsonReq.password, relatedUser.hashedPassword))) {
             return res.status(400).json({
                 'status': 'DELETE_ACCOUNT_FAILURE',
                 'message': 'Incorrect password! Unable to delete staff account.',
@@ -85,7 +87,7 @@ async function deleteAccountStaff(jsonReq: DeleteAccountRequest, res: Response) 
             }); 
         }
         else {
-            await deleteStaff(relatedStaff.staff.username, relatedStaff.staff.hashedPassword)
+            await deleteStaff(relatedUser.username, relatedUser.hashedPassword)
 
             return res.status(200).json({
                 'status': 'DELETE_ACCOUNT_SUCCESS',
@@ -118,12 +120,15 @@ async function deleteAccountPatient(jsonReq: DeleteAccountRequest, res: Response
         if (!(await validateHash(jsonReq.password, relatedPatient.patient.hashedPassword))) {
             return res.status(400).json({
                 'status': 'DELETE_ACCOUNT_FAILURE',
-                'message': 'Incorrect password! Unable to delete staff account.',
+                'message': 'Incorrect password! Unable to delete patient account.',
                 'data': {}
             }); 
         }
         else {
             await deletePatient(relatedPatient.patient.username, relatedPatient.patient.hashedPassword)
+
+            // Delete the patient relationship with the staff who created the enrolment code
+            await deletePatientStaffRelationshipByPatientID(relatedPatient.patient.id)
             
             return res.status(200).json({
                 'status': 'DELETE_ACCOUNT_SUCCESS',
