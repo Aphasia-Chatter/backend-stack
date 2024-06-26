@@ -8,6 +8,7 @@ import selectPatientByUsername from '../repositories/selectPatientByUsername';
 import selectEnrolmentCodeByUsernameAndCode from '../repositories/selectEnrolmentCodeByUsernameAndCode';
 import insertLog from '../repositories/insertLog';
 import deleteEnrolmentCodeByUsername from '../repositories/deleteEnrolmentCodeByUsername';
+import insertPatientStaffRelationship from '../repositories/insertPatientStaffRelationship';
 
 export enum RegisterType {
     STAFF,
@@ -153,6 +154,12 @@ async function registerPatient(jsonReq: RegisterRequest, res: Response) {
 
         // Delete the enrolment code from the database after patient registration (either this or set status is Used or sth)
         await deleteEnrolmentCodeByUsername(patientUsername, jsonReq.enrolmentCode)
+
+        // Establish relationship between the staff who created the enrolment code and the registered patient
+        const result3 = await selectPatientByUsername(patientUsername)
+        const relatedPatientUser = result3[0]
+        const relatedStaffUser = result2[0]
+        await insertPatientStaffRelationship(relatedPatientUser.id, relatedStaffUser.staffID)
 
         return res.status(201).json({
             status: 'REGISTRATION SUCCESS',
