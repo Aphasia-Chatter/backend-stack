@@ -21,6 +21,7 @@ import createEnrolmentCode from '../controllers/staff/createEnrolmentCode'
 import removeEnrolmentCode from '../controllers/staff/removeEnrolmentCode';
 
 import selectPatientByUsername from '../repositories/selectPatientByUsername';
+import getAllRelatedPatients from '../controllers/staff/getAllRelatedPatients';
 
 const router: Router = Router();
 
@@ -80,6 +81,12 @@ router.post('/create-enrolment-code', (req: Request, res: Response) => {
 router.post('/remove-existing-enrolment-code', (req: Request, res: Response) => {
 	removeEnrolmentCode(req, res)
 })
+
+// /api/staff/get-all-related-patients
+router.get('/get-all-related-patients', async (req: Request, res: Response) => {
+	getAllRelatedPatients(req, res)
+})
+
 
 router.post('/create-word-retrevial-task', multer({ storage: wordRetrevialTaskstorage, fileFilter: multerImagefileFilter }).single('image'), (req: Request, res: Response) => {
 	createTask(req, res, TaskType.WORD_RETREVIAL)
