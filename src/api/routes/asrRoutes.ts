@@ -20,10 +20,26 @@ const upload = multer({ storage: storage });
 
 // /api/asr/transcribe
 router.post('/transcribe', upload.single('audioFile'), (req: Request, res: Response) => {
-    if (!req.file) {
-        return res.status(400).json({ status: "FAILURE", message: "No file uploaded." });
+    const audioFileBase64 = req.body.audioFile;
+    
+    if (!audioFileBase64) {
+        return res.status(400).json({ error: "'audioFile' key is missing or undefined in the request body." });
     }
-    transcribe(req, res);
+
+    // Convert Base64 to Buffer
+    const audioFileBuffer = Buffer.from(audioFileBase64, 'base64');
+    console.log("audioFileBuffer", audioFileBuffer)
+
+    transcribe(audioFileBuffer, res);
 });
+
+
+// // /api/asr/transcribe
+// router.post('/transcribe', upload.single('audioFile'), (req: Request, res: Response) => {
+//     if (!req.file) {
+//         return res.status(400).json({ status: "FAILURE", message: "No file uploaded." });
+//     }
+//     transcribe(req, res);
+// });
 
 export default router

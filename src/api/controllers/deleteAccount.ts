@@ -4,8 +4,8 @@ import deleteStaff from '../repositories/deleteStaff';
 import deletePatient from '../repositories/deletePatient';
 import selectPatientByUsernameAndToken from '../repositories/selectPatientByUsernameAndToken';
 import validateHash from '../utils/validateHash';
+import deletePatientStaffRelationshipByPatientID from '../repositories/deletePatientStaffRelationshipByPatientID';
 import validateStaffRequest from '../utils/validateStaffRequest';
-
 
 export enum DeleteAccountType {
     STAFF,
@@ -120,12 +120,15 @@ async function deleteAccountPatient(jsonReq: DeleteAccountRequest, res: Response
         if (!(await validateHash(jsonReq.password, relatedPatient.patient.hashedPassword))) {
             return res.status(400).json({
                 'status': 'DELETE_ACCOUNT_FAILURE',
-                'message': 'Incorrect password! Unable to delete staff account.',
+                'message': 'Incorrect password! Unable to delete patient account.',
                 'data': {}
             }); 
         }
         else {
             await deletePatient(relatedPatient.patient.username, relatedPatient.patient.hashedPassword)
+
+            // Delete the patient relationship with the staff who created the enrolment code
+            await deletePatientStaffRelationshipByPatientID(relatedPatient.patient.id)
             
             return res.status(200).json({
                 'status': 'DELETE_ACCOUNT_SUCCESS',
