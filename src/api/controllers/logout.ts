@@ -2,8 +2,8 @@ import { Request, Response } from 'express';
 
 import deleteStaffSessionToken from '../repositories/deleteStaffSessionToken';
 import deletePatientSessionToken from '../repositories/deletePatientSessionToken';
-import selectStaffByUsernameAndToken from '../repositories/selectStaffByUsernameAndToken';
 import selectPatientByUsernameAndToken from '../repositories/selectPatientByUsernameAndToken';
+import validateStaffRequest from '../utils/validateStaffRequest';
 
 export enum LogoutType {
     STAFF,
@@ -35,7 +35,7 @@ export default async function logout(req: Request, res: Response, logoutType: Lo
     }
 
     if (logoutType == LogoutType.STAFF) {
-        await logoutStaff(jsonReq as LogoutRequest, res)
+        await logoutStaff(jsonReq as LogoutRequest, req, res)
     }
     else if (logoutType == LogoutType.PATIENT) {
         await logoutPatient(jsonReq as LogoutRequest, res)
@@ -50,19 +50,20 @@ export default async function logout(req: Request, res: Response, logoutType: Lo
 }
 
 // Staff Logout Function
-async function logoutStaff(jsonReq: LogoutRequest, res: Response) {
-    const result = await selectStaffByUsernameAndToken(jsonReq.username, jsonReq.sessionToken)
-    if (result.length <= 0) {
-        return res.status(400).json({
-            'status': 'BAD_USERNAME',
-            'message': 'User does not exist!',
+async function logoutStaff(jsonReq: LogoutRequest, req: Request, res: Response) {
+    const validationResult = await validateStaffRequest(req, jsonReq.username)
+    if (!validationResult.isValid) {
+        return res.status(401).json({
+            'status': validationResult.status,
+            'message': validationResult.message,
             'data': {}
-        }); 
+        })
     }
-    const relatedUser = result[0]
+
+    const relatedUser = validationResult.staff!
 
     try {    
-        await deleteStaffSessionToken(relatedUser.staff.id, relatedUser.staff_session_token.token)
+        await deleteStaffSessionToken(relatedUser.id, relatedUser.hashedToken)
         
         return res.status(200).json({
             'status': 'SUCCESS',

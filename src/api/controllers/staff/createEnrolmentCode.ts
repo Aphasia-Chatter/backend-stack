@@ -1,10 +1,10 @@
 import { Request, Response } from 'express';
 
-import selectStaffByUsernameAndToken from '../../repositories/selectStaffByUsernameAndToken';
 import insertEnrolmentCode from 'src/api/repositories/insertEnrolmentCode';
 import selectPatientByUsername from 'src/api/repositories/selectPatientByUsername';
 import selectEnrolmentCodeByUsername from 'src/api/repositories/selectEnrolmentCodeByUsername';
 import generateRandomString from 'src/api/utils/generateRandomString';
+import validateStaffRequest from 'src/api/utils/validateStaffRequest';
 
 interface CreateEnrolmentCodeRequest {
     username: string;
@@ -39,17 +39,17 @@ export default async function createEnrolmentCode(req: Request, res: Response) {
         });
     }
 
-    const result = await selectStaffByUsernameAndToken(jsonReq.username, jsonReq.sessionToken)
-
-    if (result.length <= 0) {
-        return res.status(400).json({
-            'status': 'BAD_USERNAME',
-            'message': 'User does not exist!',
+    const validationResult = await validateStaffRequest(req, jsonReq.username)
+    if (!validationResult.isValid) {
+        return res.status(401).json({
+            'status': validationResult.status,
+            'message': validationResult.message,
             'data': {}
-        }); 
+        })
     }
 
-    const relatedUser = result[0]
+    const relatedUser = validationResult.staff!
+
 
     try {
         // Check if there is an existing patient account with the username
@@ -75,7 +75,7 @@ export default async function createEnrolmentCode(req: Request, res: Response) {
         } else {
             // If not exist, generate a random code for the username
             randomCode = generateRandomString();
-            await insertEnrolmentCode(relatedUser.staff.id, jsonReq.patientDesiredUsername, randomCode)
+            await insertEnrolmentCode(relatedUser.id, jsonReq.patientDesiredUsername, randomCode)
             return res.status(200).json({
                 'status': 'SUCCESS',
                 'message': `A new enrolment code is created for patient ${jsonReq.patientDesiredUsername}. The code is ${randomCode}`,

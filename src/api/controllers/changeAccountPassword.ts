@@ -3,12 +3,11 @@ import { Request, Response } from 'express';
 import * as argon2 from "argon2";
 import updateStaffPassword from '../repositories/updateStaffPassword';
 import updatePatientPassword from '../repositories/updatePatientPassword';
-import selectStaffByUsernameAndToken from '../repositories/selectStaffByUsernameAndToken';
 import selectPatientByUsernameAndToken from '../repositories/selectPatientByUsernameAndToken';
 import validateHash from '../utils/validateHash';
-import checkPasswordComplexity from '../utils/checkPasswordComplexity';
 import deleteAllPatientSessionToken from '../repositories/deleteAllPatientSessionToken';
 import deleteAllStaffSessionToken from '../repositories/deleteAllStaffSessionToken';
+import validateStaffRequest from '../utils/validateStaffRequest';
 
 export enum ChangeAccountPasswordType {
     STAFF,
@@ -75,7 +74,7 @@ export default async function changeAccountPassword(req: Request, res: Response,
     }
 
     if (changeAccountPasswordType == ChangeAccountPasswordType.STAFF) {
-        await changeStaffAccountPassword(jsonReq as ChangeAccountPasswordRequest, res)
+        await changeStaffAccountPassword(jsonReq as ChangeAccountPasswordRequest, req, res)
     }
     else if (changeAccountPasswordType == ChangeAccountPasswordType.PATIENT) {
         await changePatientAccountPassword(jsonReq as ChangeAccountPasswordRequest, res)
@@ -89,23 +88,25 @@ export default async function changeAccountPassword(req: Request, res: Response,
 }
 
 // Staff Logout Function
-async function changeStaffAccountPassword(jsonReq: ChangeAccountPasswordRequest, res: Response) {
+async function changeStaffAccountPassword(jsonReq: ChangeAccountPasswordRequest,req: Request, res: Response) {
     // Check if staff with session exists
-    const result = await selectStaffByUsernameAndToken(jsonReq.username, jsonReq.sessionToken)
-    if (result.length <= 0) {
-        return res.status(400).json({
-            'status': 'BAD_STAFF_ACCOUNT',
-            'message': 'User does not exist!'
-        }); 
+    const validationResult = await validateStaffRequest(req, jsonReq.username)
+    if (!validationResult.isValid) {
+        return res.status(401).json({
+            'status': validationResult.status,
+            'message': validationResult.message,
+            'data': {}
+        })
     }
 
-    const relatedStaff = result[0]
-    
+    const relatedStaff = validationResult.staff!
+
+
     try {
         // Check for new password complexity
 
         // Check for password hash
-        if (!(await validateHash(jsonReq.currentPassword, relatedStaff.staff.hashedPassword))) {
+        if (!(await validateHash(jsonReq.currentPassword, relatedStaff.hashedPassword))) {
             return res.status(400).json({
                 'status': 'CHANGE_ACCOUNT_PASSWORD_FAILURE',
                 'message': 'Incorrect password! Unable to update staff account password.',
@@ -121,10 +122,10 @@ async function changeStaffAccountPassword(jsonReq: ChangeAccountPasswordRequest,
                 staffHashedNewPassword = await argon2.hash(staffNewPassword + hashPepper);
 
                 // Update staff password with new password
-                await updateStaffPassword(relatedStaff.staff.username, staffHashedNewPassword)
+                await updateStaffPassword(relatedStaff.username, staffHashedNewPassword)
                 
                 // Clear all staff active sessions
-                await deleteAllStaffSessionToken(relatedStaff.staff.id)
+                await deleteAllStaffSessionToken(relatedStaff.id)
 
                 return res.status(200).json({
                     'status': 'CHANGE_ACCOUNT_PASSWORD_SUCCESS',
