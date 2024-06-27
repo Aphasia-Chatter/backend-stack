@@ -8,7 +8,7 @@ export default async function fetchAllRelatedPatientsByStaffID(staffID: string) 
             .from(patient)
             .innerJoin(patient_staff, eq(patient.id, patient_staff.patientID))
             .where(eq(patient_staff.staffID, staffID))
-            .execute(); // Executes the query and returns the results
+            // .execute(); // Executes the query and returns the results
 
         return results.map((record: any) => ({
             username: record.patient.username,
