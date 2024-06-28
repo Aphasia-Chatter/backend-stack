@@ -14,7 +14,16 @@ Method:
 
 Body: `multipart/form-data`
 ```
-audioFile: [YOUR FILE]
+audioFile: <YOUR FILE>
+```
+
+Successful response: `JSON`
+
+```
+{
+	"status": "SUCCESS",
+	"transcription": <TRANSCRIBED TEXT>
+}
 ```
 
 ### For Verifying Answer
@@ -33,15 +42,25 @@ Body: `JSON`
 ```
 {
     "word_retrieval_task_id": "WORD_RETRIEVAL_TASK_ID",
-    "user_answer": "USER_ANSWER"
+    "user_answer": "USER_ANSWER",
+    "hierarchy_num": NUMBER (1-6)
+}
+```
+
+Successful response: `JSON`
+
+```
+{
+	"status": "SUCCESS",
+	"message": "Type <HIERARCHY> hierarchy cues generated successfully.",
+	"num_cues": NUMBER
 }
 ```
 
 ### For Generating Cues
 
-*Semantic Cue Endpoint*
 ```
-http://localhost:44818/api/generate-cue/semantic
+http://localhost:44818/api/generate-cue
 ```
 
 Method:
@@ -53,24 +72,17 @@ Body: `JSON`
 ```
 {
     "word_retrieval_task_id": "WORD_RETRIEVAL_TASK_ID",
-    "num_cues": 0 [Input the number of cues you want to generate]
+    "num_cues": <NUMBER OF CUES>,
+    "hierarchy_num": <HIERARCHY NUMBER>
 }
 ```
 
-*Phonetic Cue Endpoint*
-```
-http://localhost:44818/api/generate-cue/phonetic
-```
-
-Method:
-
-`POST`
-
-Body: `JSON`
+Successful response: `JSON`
 
 ```
 {
-    "word_retrieval_task_id": "WORD_RETRIEVAL_TASK_ID",
-    "num_cues": 0 [Input the number of cues you want to generate]
+	"status": "SUCCESS",
+	"message": "Type <HIERARCHY> hierarchy cues generated successfully.",
+	"num_cues": <NUMBER OF CUES>
 }
 ```
