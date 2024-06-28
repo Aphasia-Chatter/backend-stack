@@ -3,7 +3,7 @@ export default function tokenizeAnswer(answer: String) {
     // and convert to lowercase
     const words = answer.split(" ");
     for (let word = 0; word < words.length; word++) {
-        words[word].toLowerCase()
+        words[word] = words[word].toLowerCase()
     }
     return words;
 }
