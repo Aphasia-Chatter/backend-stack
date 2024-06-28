@@ -1,14 +1,11 @@
 
 import { Request, Response } from 'express';
-import fetchAllStaffTokens from '../repositories/fetchAllStaffToken';
-import selectStaffByUsername from '../repositories/selectStaffByUsername';
+import selectPatientByUsername from '../repositories/selectPatientByUsername';
+import selectTokensByPatientID from '../repositories/selectTokensByPatientID';
 import decryptClientInformation from './decryptClientInformation';
 import validateHash from './validateHash';
 
 import utf8Enc from 'crypto-js/enc-utf8';
-import selectPatientByUsernameAndToken from '../repositories/selectPatientByUsernameAndToken';
-import selectPatientByUsername from '../repositories/selectPatientByUsername';
-import selectTokensByPatientID from '../repositories/selectTokensByPatientID';
 
 /**
  * Represents the validation result of a staff request.
@@ -27,6 +24,7 @@ interface ValidationResult {
         id: string;
         username: string;
         hashedPassword: string;
+        hashedToken: string;
     } | null;
 }
 
@@ -72,12 +70,12 @@ export default async function validatePatientRequest(request: Request, userName:
 
     const clientInfo = request.headers['user-agent'] as string;
 
-    for (const pToken of patientTokens) {
-        if (!await validateHash(sessionToken, pToken.token)) {
+    for (const patientToken of patientTokens) {
+        if (!await validateHash(sessionToken, patientToken.token)) {
             continue;
         }
 
-        const decryptedClientInfo = decryptClientInformation(pToken.encryptedClientInformation).toString(utf8Enc);
+        const decryptedClientInfo = decryptClientInformation(patientToken.encryptedClientInformation).toString(utf8Enc);
 
         if (decryptedClientInfo !== clientInfo) {
             // TODO: Delete session token?
@@ -95,7 +93,12 @@ export default async function validatePatientRequest(request: Request, userName:
             isValid: true,
             status: "SUCCESS",
             message: "Session token is valid!",
-            patient: relatedPatient
+            patient: {
+                id: relatedPatient.id,
+                username: relatedPatient.username,
+                hashedPassword: relatedPatient.hashedPassword,
+                hashedToken: patientToken.token
+            },
         };
     }
 
