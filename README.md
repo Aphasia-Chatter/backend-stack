@@ -22,7 +22,7 @@ Successful response: `JSON`
 ```
 {
 	"status": "SUCCESS",
-	"transcription": <TRANSCRIBED TEXT>
+	"transcription": "TRANSCRIBED TEXT"
 }
 ```
 
@@ -41,9 +41,8 @@ Body: `JSON`
 
 ```
 {
-    "word_retrieval_task_id": "WORD_RETRIEVAL_TASK_ID",
-    "user_answer": "USER_ANSWER",
-    "hierarchy_num": NUMBER (1-6)
+    "word_retrieval_task_id": "TASK_ID",
+    "user_answer": "USER_ANSWER"
 }
 ```
 
@@ -52,8 +51,15 @@ Successful response: `JSON`
 ```
 {
 	"status": "SUCCESS",
-	"message": "Type <HIERARCHY> hierarchy cues generated successfully.",
-	"num_cues": NUMBER
+	"user_answer": "USER_ANSWER",
+	"task": {
+		"taskID": "TASK_ID",
+		"imagePath": "IMAGE PATH",
+		"answer": "TARGET_WORD",
+		"inputRestriction": "VOICE_ONLY | TEXT_ONLY | NONE | NULL"
+	},
+	"correct": <BOOL>,
+	"messages": "CONGRATULATORY MESSAGE"
 }
 ```
 
