@@ -1,7 +1,7 @@
 
 import { Request, Response } from 'express';
-import selectPatientByUsername from '../repositories/selectPatientByUsername';
 import selectTokensByPatientID from '../repositories/selectTokensByPatientID';
+import selectPatientByUsername from '../repositories/selectPatientByUsername';
 import decryptClientInformation from './decryptClientInformation';
 import validateHash from './validateHash';
 
@@ -36,7 +36,7 @@ interface ValidationResult {
  * @return {Promise<ValidationResult>} A promise that resolves to a ValidationResult object indicating the validation status.
  */
 export default async function validatePatientRequest(request: Request, userName: string): Promise<ValidationResult> {
-    const sessionToken = request.headers['session-token'] as string;
+    const sessionToken = request.headers['session-token'] as string ?? request.body['sessionToken'] as string ?? request.query['sessionToken'] as string;
     if (!sessionToken.trim()) {
         return {
             isValid: false,

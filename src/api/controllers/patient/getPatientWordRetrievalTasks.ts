@@ -46,33 +46,41 @@ export default async function getPatientWordRetrievalTasks(req: Request, res: Re
 
     const relatedPatient = validationResult.patient!
 
+    try {
+        const jsonBody = req.body as Partial<GetWordRetrievalTaskFilters>;
+        
+        const selectionResult = await selectPatientWordRetrievalTasksWithFilters(
+            relatedPatient.id,
+            jsonBody.name,
+            jsonBody.creator_name,
+            jsonBody.completion_status,
+            jsonBody.creator_is_patient_staff,
+            jsonBody.max_selection,
+            jsonBody.selection_offset
+        );
     
-    const jsonBody = req.body as Partial<GetWordRetrievalTaskFilters>;
-    const selectionResult = await selectPatientWordRetrievalTasksWithFilters(
-        relatedPatient.id,
-        jsonBody.name,
-        jsonBody.creator_name,
-        jsonBody.completion_status,
-        jsonBody.creator_is_patient_staff,
-        jsonBody.max_selection,
-        jsonBody.selection_offset
-    );
-
-    if (selectionResult.length > 0) {
-        console.log(selectionResult)
-        return res.status(200).json({
-            status: "SUCCESS",
-            message: "Word retrieval tasks successfully retrieved",
-            data: {
-                tasks: selectionResult
-            }
-        });
-
-    } else {
-        return res.status(400).json({
-            'status': 'FAILED',
-            'message': ' No word retrieval tasks found!',
+        if (selectionResult.length > 0) {
+            console.log(selectionResult)
+            return res.status(200).json({
+                status: "SUCCESS",
+                message: "Word retrieval tasks successfully retrieved",
+                data: {
+                    tasks: selectionResult
+                }
+            });
+    
+        } else {
+            return res.status(400).json({
+                'status': 'FAILED',
+                'message': ' No word retrieval tasks found!',
+                'data': {}
+            });   
+        } 
+    } catch (err) {
+        return res.status(500).json({
+            'status': 'SERVER_ERROR',
+            'message': 'Server encountered an error! Contact admin if persists!',
             'data': {}
-        });   
-    }  
+        });
+    } 
 }
