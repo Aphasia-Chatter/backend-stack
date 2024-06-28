@@ -68,15 +68,30 @@ Successful response (Incorrect Answer): `JSON`
 ```
 {
 	"status": "SUCCESS",
-	"user_answer": "USER_ANSWER",
 	"task": {
 		"taskID": "TASK_ID",
-		"imagePath": "IMAGE PATH",
+		"imagePath": "IMAGE_PATH",
 		"answer": "TARGET_WORD",
 		"inputRestriction": "VOICE_ONLY | TEXT_ONLY | NONE | NULL"
 	},
-	"correct": <BOOL>,
-	"messages": "CONGRATULATORY MESSAGE"
+	"correct": false,
+	"cues": [
+		{
+			"id": 0,
+			"taskID": "TASK_ID",
+			"content": "CUE 1",
+			"type": "message",
+			"hierarchyNum": <HIERARCHY_NUMBER>
+		},
+		{
+			"id": 1,
+			"taskID": "TASK_ID",
+			"content": "CUE 2",
+			"type": "message",
+			"hierarchyNum": <HIERARCHY_NUMBER>
+		},
+		...
+	]
 }
 ```
 
