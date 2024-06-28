@@ -129,7 +129,8 @@ export const wordRetrievalTaskHint = pgTable('word_retrieval_task_hint', {
 	id: smallint('hint_number').notNull(),
 	taskID: uuid('task_id').references(() => task.id, { onDelete: 'cascade' }).notNull(),
 	content: text('content').notNull(),
-	type: wordRetrievalHintTypeEnum('type').notNull()
+	type: wordRetrievalHintTypeEnum('type').notNull(),
+	hierarchyNum: integer('hierarchy_num').notNull()  // Added the new field here
 }, (table) => {
 	return {
 		pk: primaryKey({ columns: [table.id, table.taskID] }),
