@@ -46,7 +46,24 @@ Body: `JSON`
 }
 ```
 
-Successful response: `JSON`
+Successful response (Correct Answer): `JSON`
+
+```
+{
+	"status": "SUCCESS",
+	"user_answer": "USER_ANSWER",
+	"task": {
+		"taskID": "TASK_ID",
+		"imagePath": "IMAGE PATH",
+		"answer": "TARGET_WORD",
+		"inputRestriction": "VOICE_ONLY | TEXT_ONLY | NONE | NULL"
+	},
+	"correct": <BOOL>,
+	"messages": "CONGRATULATORY MESSAGE"
+}
+```
+
+Successful response (Incorrect Answer): `JSON`
 
 ```
 {
