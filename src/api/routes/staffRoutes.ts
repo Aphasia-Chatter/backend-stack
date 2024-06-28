@@ -24,6 +24,9 @@ import selectPatientByUsername from '../repositories/selectPatientByUsername';
 import selectPatientByLIKE from '../repositories/selectPatientsByLIKE';
 import getAllRelatedPatients from '../controllers/staff/getAllRelatedPatients';
 import getNumberOfCompletedAssessments from '../repositories/getNumberOfCompletedAssessments';
+import getRecentCompletedAssessments from '../repositories/getRecentCompletedAssessments';
+import getRecentActivities from '../repositories/getRecentActivities';
+import insertWordRetrievalSession from '../repositories/insertWordRetrievalSession';
 
 const router: Router = Router();
 
@@ -102,6 +105,12 @@ router.get('/get-word-retrevial-task', (req: Request, res: Response) => {
 	getTask(req, res, TaskType.WORD_RETREVIAL)
 })
 
+// For insert word retrieval task
+// /api/staff/insert_word_retrieval_session
+router.post('/insert_word_retrieval_session', async (req: Request, res: Response) => {
+  //insertWordRetrievalSession(patient_id, task_id);
+});
+
 // /api/staff/search?username=xxx
 router.get('/search', async (req: Request, res: Response) => {
     const { username } = req.query;
@@ -151,6 +160,29 @@ router.get('/get_num_assessments_completed/:patientId', async (req: Request, res
   }
 });
 
+// /api/staff/get_recent_assessments_completed
+router.get('/get_recent_assessments_completed/:patientId', async (req: Request, res: Response) => {
+  const { patientId } = req.params;
+
+  try {
+    const assessments = await getRecentCompletedAssessments(patientId);
+    return res.json(assessments);
+  } catch (error) {
+    res.status(500).send({ error: 'An error occurred while fetching the assessments' });
+  }
+});
+
+// /api/staff/get_recent_activities
+router.get('/get_recent_activities/:patientId', async (req: Request, res: Response) => {
+  const { patientId } = req.params;
+
+  try {
+    const activity = await getRecentActivities(patientId);
+    return res.json(activity);
+  } catch (error) {
+    res.status(500).send({ error: 'An error occurred while fetching the activities'});
+  }
+});
 
 
 //#endregion

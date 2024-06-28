@@ -13,6 +13,7 @@ export default async function fetchAllRelatedPatientsByStaffID(staffID: string) 
         return results.map((record: any) => ({
             username: record.patient.username,
             enrolledAt: record.patient.enrolledAt,
+            id: record.patient.id //added this line
         }));
     } catch (error) {
         console.error("Error fetching related patients by staff ID:", error);
