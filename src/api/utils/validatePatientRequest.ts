@@ -1,14 +1,11 @@
 
 import { Request, Response } from 'express';
-import fetchAllStaffTokens from '../repositories/fetchAllStaffToken';
-import selectStaffByUsername from '../repositories/selectStaffByUsername';
+import fetchAllPatientToken from '../repositories/fetchAllPatientToken';
+import selectPatientByUsername from '../repositories/selectPatientByUsername';
 import decryptClientInformation from './decryptClientInformation';
 import validateHash from './validateHash';
 
 import utf8Enc from 'crypto-js/enc-utf8';
-import selectPatientByUsernameAndToken from '../repositories/selectPatientByUsernameAndToken';
-import selectPatientByUsername from '../repositories/selectPatientByUsername';
-import selectTokensByPatientID from '../repositories/selectTokensByPatientID';
 
 /**
  * Represents the validation result of a staff request.
@@ -27,6 +24,7 @@ interface ValidationResult {
         id: string;
         username: string;
         hashedPassword: string;
+        hashedToken: string;
     } | null;
 }
 
@@ -38,7 +36,7 @@ interface ValidationResult {
  * @return {Promise<ValidationResult>} A promise that resolves to a ValidationResult object indicating the validation status.
  */
 export default async function validatePatientRequest(request: Request, userName: string): Promise<ValidationResult> {
-    const sessionToken = request.headers['session-token'] as string;
+    const sessionToken = request.headers['session-token'] as string ?? request.body['sessionToken'] as string ?? request.query['sessionToken'] as string;
     if (!sessionToken.trim()) {
         return {
             isValid: false,
@@ -68,16 +66,16 @@ export default async function validatePatientRequest(request: Request, userName:
     }
 
     const relatedPatient = matchedUsers[0];
-    const patientTokens = await selectTokensByPatientID(relatedPatient.id);
+    const patientTokens = await fetchAllPatientToken(relatedPatient.id);
 
     const clientInfo = request.headers['user-agent'] as string;
 
-    for (const pToken of patientTokens) {
-        if (!await validateHash(sessionToken, pToken.token)) {
+    for (const patientToken of patientTokens) {
+        if (!await validateHash(sessionToken, patientToken.token)) {
             continue;
         }
 
-        const decryptedClientInfo = decryptClientInformation(pToken.encryptedClientInformation).toString(utf8Enc);
+        const decryptedClientInfo = decryptClientInformation(patientToken.encryptedClientInformation).toString(utf8Enc);
 
         if (decryptedClientInfo !== clientInfo) {
             // TODO: Delete session token?
@@ -95,7 +93,12 @@ export default async function validatePatientRequest(request: Request, userName:
             isValid: true,
             status: "SUCCESS",
             message: "Session token is valid!",
-            patient: relatedPatient
+            patient: {
+                id: relatedPatient.id,
+                username: relatedPatient.username,
+                hashedPassword: relatedPatient.hashedPassword,
+                hashedToken: patientToken.token
+            },
         };
     }
 

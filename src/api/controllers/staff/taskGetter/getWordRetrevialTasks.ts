@@ -36,26 +36,35 @@ export async function getWordRetrevialTasks(
     try {
         const tasks = await getStaffWordRetrevialTasks(staff.id, nameFilter, visbilityFilter);
 
-        const formattedResult = []
-        for (let i = 0; i < tasks.length; i++) {
-            const currentTask = tasks[i]
-            formattedResult.push({
-                id: currentTask.task.id,
-                name: currentTask.task.name,
-                description: currentTask.task.description,
-                visibility: currentTask.task.taskVisibility,
-                answer: currentTask.word_retrieval_task.answer,
-                role: currentTask.task_editor.role,
-                created_at: currentTask.task.createdAt,
-            })
-        }
-        return res.status(200).json({
-            status: "SUCCESS",
-            message: "Successfully retrieved tasks!",
-            data: {
-                tasks: tasks
+        if (tasks.length > 0) {
+            const formattedResult = []
+            for (let i = 0; i < tasks.length; i++) {
+                const currentTask = tasks[i]
+                formattedResult.push({
+                    id: currentTask.task.id,
+                    name: currentTask.task.name,
+                    description: currentTask.task.description,
+                    visibility: currentTask.task.taskVisibility,
+                    answer: currentTask.word_retrieval_task.answer,
+                    role: currentTask.task_editor.role,
+                    created_at: currentTask.task.createdAt,
+                })
             }
-        })
+            return res.status(200).json({
+                status: "SUCCESS",
+                message: "Successfully retrieved tasks!",
+                data: {
+                    tasks: tasks
+                }
+            })
+        } else {
+            return res.status(400).json({
+                'status': 'FAILED',
+                'message': ' No word retrieval tasks found!',
+                'data': {}
+            }); 
+        }
+    
     } catch (error: any) {
         
         console.error("Error during image upload:", error);

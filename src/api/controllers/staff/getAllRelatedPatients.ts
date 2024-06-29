@@ -1,10 +1,7 @@
 import { Request, Response } from 'express';
 
-import selectStaffByUsernameAndToken from '../../repositories/selectStaffByUsernameAndToken';
 import fetchAllRelatedPatientByStaffID from '../../repositories/fetchAllRelatedPatientByStaffID'
 import validateStaffRequest from 'src/api/utils/validateStaffRequest';
-
-
 
 interface GetAllRelatedPatientsRequest {
     username: string;
@@ -31,7 +28,7 @@ export default async function getAllRelatedPatients(req: Request, res: Response)
             'data': {}
         });
     }
-    
+
     const validationResult = await validateStaffRequest(req, username.toString())
     if (!validationResult.isValid) {
         return res.status(401).json({
@@ -40,6 +37,7 @@ export default async function getAllRelatedPatients(req: Request, res: Response)
             'data': {}
         })
     }
+
    
     const relatedUser = validationResult.staff!
     
@@ -48,7 +46,6 @@ export default async function getAllRelatedPatients(req: Request, res: Response)
         const relatedPatients = await fetchAllRelatedPatientByStaffID(relatedUser.id);
         
         if (relatedPatients.length > 0) {
-            
             // A list of related patients found
             console.log("HEE", relatedPatients)
             return res.status(200).json({

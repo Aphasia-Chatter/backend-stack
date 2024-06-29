@@ -2,6 +2,6 @@ import { db } from "src/db";
 import { enrollmentCode } from "src/schema";
 import { eq } from "drizzle-orm";
 
-export default async function fetchAllStaffTokens(staffID: string) {
+export default async function fetchAllEnrolmentByStaffID(staffID: string) {
     return await db.select().from(enrollmentCode).where(eq(enrollmentCode.staffID, staffID))
 }
