@@ -7,6 +7,7 @@ import deleteAccount, { DeleteAccountType } from '../controllers/deleteAccount';
 import changeAccountPassword, { ChangeAccountPasswordType } from '../controllers/changeAccountPassword';
 import checkToken from '../controllers/staff/checkToken';
 import getPatientWordRetrievalTasks from '../controllers/patient/getPatientWordRetrievalTasks';
+import createWordRetrievalTaskSession from '../controllers/patient/createWordRetrievalTaskSession';
 
 const router: Router = Router();
 
@@ -42,8 +43,13 @@ router.post('/change-account-password', (req: Request, res: Response) => {
 
 // /api/patient/get-word-retrieval-task
 router.get('/get-word-retrieval-task', async (req: Request, res: Response) => {
-  console.log('success')
   getPatientWordRetrievalTasks(req, res)
+})
+
+// /api/patient/create-word-retrieval-task-session
+router.post('/create-word-retrieval-task-session', async (req: Request, res: Response) => {
+  console.log('success')
+  createWordRetrievalTaskSession(req, res)
 })
 
 export default router;

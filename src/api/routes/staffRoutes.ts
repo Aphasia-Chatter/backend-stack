@@ -18,7 +18,7 @@ import getTask from '../controllers/staff/taskGetter/getTask';
 
 import getAllEnrolmentCodes from '../controllers/staff/enrollment/getAllEnrolmentCodes';
 import createEnrolmentCode from '../controllers/staff/enrollment/createEnrolmentCode'
-import removeEnrolmentCode from '../controllers/staff/removeEnrolmentCode';
+import removeEnrolmentCode from '../controllers/staff/enrollment/removeEnrolmentCode';
 
 import selectPatientByUsername from '../repositories/selectPatientByUsername';
 import selectPatientByLIKE from '../repositories/selectPatientsByLIKE';
@@ -26,7 +26,7 @@ import getAllRelatedPatients from '../controllers/staff/getAllRelatedPatients';
 import getNumberOfCompletedAssessments from '../repositories/getNumberOfCompletedAssessments';
 import getRecentCompletedAssessments from '../repositories/getRecentCompletedAssessments';
 import getRecentActivities from '../repositories/getRecentActivities';
-import insertWordRetrievalSession from '../repositories/insertWordRetrievalSession';
+import insertWordRetrievalSession from '../repositories/insertWordRetrievalTaskSession';
 
 const router: Router = Router();
 

@@ -1,6 +1,6 @@
 
 import { Request, Response } from 'express';
-import selectTokensByPatientID from '../repositories/selectTokensByPatientID';
+import fetchAllPatientToken from '../repositories/fetchAllPatientToken';
 import selectPatientByUsername from '../repositories/selectPatientByUsername';
 import decryptClientInformation from './decryptClientInformation';
 import validateHash from './validateHash';
@@ -66,7 +66,7 @@ export default async function validatePatientRequest(request: Request, userName:
     }
 
     const relatedPatient = matchedUsers[0];
-    const patientTokens = await selectTokensByPatientID(relatedPatient.id);
+    const patientTokens = await fetchAllPatientToken(relatedPatient.id);
 
     const clientInfo = request.headers['user-agent'] as string;
 
