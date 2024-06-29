@@ -40,10 +40,10 @@ router.post('/change-account-password', (req: Request, res: Response) => {
   changeAccountPassword(req, res, ChangeAccountPasswordType.PATIENT)
 })
 
-router.post('/get-tasks', async (req: Request, res: Response) => {
-  const response = await getPatientWordRetrievalTasks(req, res)
-  // TODO: Expand to fetch the other tasks as well once they are implemented...
-  res.status(200).json(response)
+// /api/patient/get-word-retrieval-task
+router.get('/get-word-retrieval-task', async (req: Request, res: Response) => {
+  console.log('success')
+  getPatientWordRetrievalTasks(req, res)
 })
 
 export default router;

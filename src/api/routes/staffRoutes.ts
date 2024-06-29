@@ -16,8 +16,8 @@ import { multerImagefileFilter } from '../utils/multerImageFileFilter';
 import configureTask from '../controllers/staff/taskConfigure/configureTask';
 import getTask from '../controllers/staff/taskGetter/getTask';
 
-import getAllEnrolmentCodes from '../controllers/staff/getAllEnrolmentCodes';
-import createEnrolmentCode from '../controllers/staff/createEnrolmentCode'
+import getAllEnrolmentCodes from '../controllers/staff/enrollment/getAllEnrolmentCodes';
+import createEnrolmentCode from '../controllers/staff/enrollment/createEnrolmentCode'
 import removeEnrolmentCode from '../controllers/staff/removeEnrolmentCode';
 
 import selectPatientByUsername from '../repositories/selectPatientByUsername';
@@ -92,16 +92,16 @@ router.get('/get-all-related-patients', async (req: Request, res: Response) => {
 	getAllRelatedPatients(req, res)
 })
 
-
-router.post('/create-word-retrevial-task', multer({ storage: wordRetrevialTaskstorage, fileFilter: multerImagefileFilter }).single('image'), (req: Request, res: Response) => {
-	createTask(req, res, TaskType.WORD_RETREVIAL)
+router.post('/create-word-retrieval-task', multer({ storage: wordRetrevialTaskstorage, fileFilter: multerImagefileFilter }).single('image'), (req: Request, res: Response) => {
+	console.log("HEHEHE");
+  createTask(req, res, TaskType.WORD_RETREVIAL)
 })
 
-router.put('/modify-word-retrevial-task', multer({ storage: wordRetrevialTaskstorage, fileFilter: multerImagefileFilter }).single('image'), (req: Request, res: Response) => {
+router.put('/modify-word-retrieval-task', multer({ storage: wordRetrevialTaskstorage, fileFilter: multerImagefileFilter }).single('image'), (req: Request, res: Response) => {
 	configureTask(req, res, TaskType.WORD_RETREVIAL)	
 })
 
-router.get('/get-word-retrevial-task', (req: Request, res: Response) => {
+router.get('/get-word-retrieval-task', async (req: Request, res: Response) => {
 	getTask(req, res, TaskType.WORD_RETREVIAL)
 })
 

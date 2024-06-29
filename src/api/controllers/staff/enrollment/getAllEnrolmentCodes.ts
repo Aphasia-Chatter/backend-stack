@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 
-import fetchAllEnrolmentCodeByStaffID from '../../repositories/fetchAllEnrolmentByStaffID'
+import fetchAllEnrolmentByStaffID from "../../../repositories/fetchAllEnrolmentByStaffID"
 import validateStaffRequest from 'src/api/utils/validateStaffRequest';
 
 interface GetAllEnrolmentCodeRequest {
@@ -40,7 +40,7 @@ export default async function getAllEnrolmentCodes(req: Request, res: Response) 
     const relatedUser = validationResult.staff!
 
     try {
-        const enrollmentCodes = await fetchAllEnrolmentCodeByStaffID(relatedUser.id);
+        const enrollmentCodes = await fetchAllEnrolmentByStaffID(relatedUser.id);
 
         if (enrollmentCodes) {
             // A list of enrolment code found
