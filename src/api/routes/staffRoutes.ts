@@ -18,7 +18,7 @@ import getTask from '../controllers/staff/taskGetter/getTask';
 
 import getAllEnrolmentCodes from '../controllers/staff/enrollment/getAllEnrolmentCodes';
 import createEnrolmentCode from '../controllers/staff/enrollment/createEnrolmentCode'
-import removeEnrolmentCode from '../controllers/staff/removeEnrolmentCode';
+import removeEnrolmentCode from '../controllers/staff/enrollment/removeEnrolmentCode';
 
 import selectPatientByUsername from '../repositories/selectPatientByUsername';
 import selectPatientByLIKE from '../repositories/selectPatientsByLIKE';
@@ -26,7 +26,7 @@ import getAllRelatedPatients from '../controllers/staff/getAllRelatedPatients';
 import getNumberOfCompletedAssessments from '../repositories/getNumberOfCompletedAssessments';
 import getRecentCompletedAssessments from '../repositories/getRecentCompletedAssessments';
 import getRecentActivities from '../repositories/getRecentActivities';
-import insertWordRetrievalSession from '../repositories/insertWordRetrievalSession';
+import insertWordRetrievalSession from '../repositories/insertWordRetrievalTaskSession';
 
 const router: Router = Router();
 
@@ -93,7 +93,6 @@ router.get('/get-all-related-patients', async (req: Request, res: Response) => {
 })
 
 router.post('/create-word-retrieval-task', multer({ storage: wordRetrevialTaskstorage, fileFilter: multerImagefileFilter }).single('image'), (req: Request, res: Response) => {
-	console.log("HEHEHE");
   createTask(req, res, TaskType.WORD_RETREVIAL)
 })
 
@@ -105,11 +104,6 @@ router.get('/get-word-retrieval-task', async (req: Request, res: Response) => {
 	getTask(req, res, TaskType.WORD_RETREVIAL)
 })
 
-// For insert word retrieval task
-// /api/staff/insert_word_retrieval_session
-router.post('/insert_word_retrieval_session', async (req: Request, res: Response) => {
-  //insertWordRetrievalSession(patient_id, task_id);
-});
 
 // /api/staff/search?username=xxx
 router.get('/search', async (req: Request, res: Response) => {
@@ -183,7 +177,6 @@ router.get('/get_recent_activities/:patientId', async (req: Request, res: Respon
     res.status(500).send({ error: 'An error occurred while fetching the activities'});
   }
 });
-
 
 //#endregion
 

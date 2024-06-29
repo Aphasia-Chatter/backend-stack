@@ -4,7 +4,7 @@ import fs from 'fs';
 import { ALLOWED_IMAGE_TYPES } from 'src/api/config/allowedImageFiles';
 import { WORD_RETREVIAL_REQUEST_MAX_LENGTHS } from 'src/api/config/requestInputLengths';
 import insertLog from 'src/api/repositories/insertLog';
-import selectWordRetrevialTaskByID from 'src/api/repositories/selectWordRetrevialTaskByID';
+import selectWordRetrievalTaskByTaskID from 'src/api/repositories/selectWordRetrievalTaskByTaskID';
 import selectTaskByName from 'src/api/repositories/selectTaskByName';
 import { updateWordRetrevialTaskByID } from 'src/api/repositories/updateWordRetrevialTaskByID';
 
@@ -19,7 +19,7 @@ export async function configureWordRetrevialTask(
     taskID: string
 ) {
    try { 
-        const matchingTasks = await selectWordRetrevialTaskByID(taskID)
+        const matchingTasks = await selectWordRetrievalTaskByTaskID(taskID)
         if (matchingTasks.length <= 0) {
             deleteUploadedFile(req);
             return res.status(400).json({
