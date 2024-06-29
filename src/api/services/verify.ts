@@ -18,88 +18,53 @@ export async function verify(req: Request, res: Response): Promise<Response> {
         // Retrieve the words from the user_answer (ASR may pick up several words)
         const words = tokenizeAnswer(user_answer);
 
+        console.log(words);
+
         // Query from database first
         const result = await db.select().from(wordRetrievalTask).where(eq(wordRetrievalTask.taskID, word_retrieval_task_id));
         console.log(`Actual Answer: ${result[0]['answer']}`)
-        
-        if (result[0]['answer'] === user_answer) {
-            const response = await invoke(`
-                The target answer is ${result[0]['answer']}. Write a congratulatory message 
-                telling the user that he/she got the right answer, and give a short one sentence
-                description of the target answer.
-            `);
-            return res.status(200).json({
-                status: "SUCCESS",
-                user_answer: user_answer,
-                task: result[0],
-                correct: true,
-                messages: response    // Response for correct answer
-            })
-        } else if (result[0]['answer'] != user_answer) {
-            /*
-                 TODO: 
-                 
-                 1. Compare user_answer and result[0]['answer'] for similarity
-                 2. If semantically similar, look up database for cues
-                 3. If there are no cues present, generate using OpenAI GPT and store it in the DB
-                 4. Return JSON containing the cues
-            */
-            const result_cues = await db.select().from(wordRetrievalTaskHint).where(eq(wordRetrievalTaskHint.taskID, word_retrieval_task_id));
-            const result_cues_all = await db.select().from(wordRetrievalTaskHint) // To get all the word_retrieval_task, as all IDs have to be unique
-            const cues: any[] = [];
-            if (result_cues.length < 5) {
-                // Generate cues using OpenAI GPT
-                await invoke(`This is the target word: ${result[0]['answer']}. Generate for me some 
-                    meaningful cues that aids a person with aphasia to recall the target word. 
-                    Example Target Word: "Cat"
-                    
-                    Below are several examples of cues for the above target word.:
-                    
-                    What is Tom from Tom and Jerry?
-                    Feline animal
-                    Makes meow sound
-                    Pet at home
-                    Purr
-                    Has whiskers
-                    What animal is Garfield?
 
-                    Format like above.
-                    
-                    Exclude the quotation marks. I want to read the output line by line, so please do not include anything before or after the cues. 
-
-                    Generate 5 DIFFERENT cues.
-
-                    `)
-                    .then((response) => {
-                        const respose_cues = response ? response.split("\n") : [];
-                        console.log(respose_cues);
-                        for (let i = 0; i < respose_cues.length; i++) {
-                            cues.push(respose_cues[i]); 
-                            console.log(i + result_cues_all.length - 1);
-                            insertWordRetrevialTaskHint(i + result_cues_all.length, word_retrieval_task_id, cues[i], "message");
-                        }
-                    })
+        for (let i = 0; i < words.length; i++) {
+            if (result[0]['answer'] === words[i]) {
+                const response = await invoke(`
+                    The target answer is ${result[0]['answer']}. Write a congratulatory message 
+                    telling the user that he/she got the right answer, and give a short one sentence
+                    description of the target answer.
+                `);
+                return res.status(200).json({
+                    status: "SUCCESS",
+                    user_answer: user_answer,
+                    task: result[0],
+                    correct: true,
+                    messages: response    // Response for correct answer
+                }) 
             }
-            else {
-                for (let i = 0; i < result_cues.length; i++) {
-                    cues.push(result_cues[i]['content']);
-                }
-            }
-            return res.status(200).json({
-                status: "SUCCESS",
-                task: result[0],
-                correct: false,
-                cues: cues
-            })
-        } else {
-            return res.status(400).json({
-                status: "FAILURE",
-                message: "Task not found."
-            })
         }
+        
+        // Case 2: Wrong answer
+        
+        // Fetch cues from database
+        const result_cues = await db.select().from(wordRetrievalTaskHint).where(eq(wordRetrievalTaskHint.taskID, word_retrieval_task_id));
+        
+        // const result_cues_all = await db.select().from(wordRetrievalTaskHint) // To get all the word_retrieval_task, as all IDs have to be unique
+        const cues: any[] = [];
+
+        // Insert cues fetched from database into the cues array
+        for (let i = 0; i < result_cues.length; i++) {
+            cues.push(result_cues[i]);
+        }
+        
+        return res.status(200).json({
+            status: "SUCCESS",
+            task: result[0],
+            correct: false,
+            cues: cues // Includes the content and the hierarchy number
+        })
+        
     } catch(error: any) {
         return res.status(400).json({
-            status: "FAILURE"
+            status: "FAILURE",
+            message: "Task not found."
         })
     }
 }

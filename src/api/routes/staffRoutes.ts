@@ -21,7 +21,12 @@ import createEnrolmentCode from '../controllers/staff/enrollment/createEnrolment
 import removeEnrolmentCode from '../controllers/staff/removeEnrolmentCode';
 
 import selectPatientByUsername from '../repositories/selectPatientByUsername';
+import selectPatientByLIKE from '../repositories/selectPatientsByLIKE';
 import getAllRelatedPatients from '../controllers/staff/getAllRelatedPatients';
+import getNumberOfCompletedAssessments from '../repositories/getNumberOfCompletedAssessments';
+import getRecentCompletedAssessments from '../repositories/getRecentCompletedAssessments';
+import getRecentActivities from '../repositories/getRecentActivities';
+import insertWordRetrievalSession from '../repositories/insertWordRetrievalSession';
 
 const router: Router = Router();
 
@@ -100,6 +105,12 @@ router.get('/get-word-retrieval-task', async (req: Request, res: Response) => {
 	getTask(req, res, TaskType.WORD_RETREVIAL)
 })
 
+// For insert word retrieval task
+// /api/staff/insert_word_retrieval_session
+router.post('/insert_word_retrieval_session', async (req: Request, res: Response) => {
+  //insertWordRetrievalSession(patient_id, task_id);
+});
+
 // /api/staff/search?username=xxx
 router.get('/search', async (req: Request, res: Response) => {
     const { username } = req.query;
@@ -118,6 +129,60 @@ router.get('/search', async (req: Request, res: Response) => {
     res.status(500).send({ error: 'An error occurred while fetching the patient' });
   }
   });
+
+// /api/staff/filter
+router.get('/filter', async (req: Request, res: Response) => {
+    const { query } = req.query;
+
+    if (!query) {
+      return res.status(400).json({ error: 'Query parameter is missing' });
+    }
+
+    try {
+      const filteredPatients = await selectPatientByLIKE(query as string);
+      return res.json(filteredPatients);
+    } catch (error) {
+      console.error('Error fetching filtered patients:', error);
+      return res.status(500).json({ error: 'An error occurred while fetching the filtered patients' });
+    }
+});
+
+// /api/staff/get_num_assessments_completed
+router.get('/get_num_assessments_completed/:patientId', async (req: Request, res: Response) => {
+  const { patientId } = req.params;
+  const today = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
+
+  try {
+    const count = await getNumberOfCompletedAssessments(patientId, today);
+    res.status(200).send({ count });
+  } catch (error) {
+    res.status(500).send({ error: 'An error occurred while fetching the assessment count' });
+  }
+});
+
+// /api/staff/get_recent_assessments_completed
+router.get('/get_recent_assessments_completed/:patientId', async (req: Request, res: Response) => {
+  const { patientId } = req.params;
+
+  try {
+    const assessments = await getRecentCompletedAssessments(patientId);
+    return res.json(assessments);
+  } catch (error) {
+    res.status(500).send({ error: 'An error occurred while fetching the assessments' });
+  }
+});
+
+// /api/staff/get_recent_activities
+router.get('/get_recent_activities/:patientId', async (req: Request, res: Response) => {
+  const { patientId } = req.params;
+
+  try {
+    const activity = await getRecentActivities(patientId);
+    return res.json(activity);
+  } catch (error) {
+    res.status(500).send({ error: 'An error occurred while fetching the activities'});
+  }
+});
 
 
 //#endregion
