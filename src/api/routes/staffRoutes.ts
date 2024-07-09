@@ -24,7 +24,7 @@ import selectPatientByUsername from '../repositories/selectPatientByUsername';
 import selectPatientByLIKE from '../repositories/selectPatientsByLIKE';
 import getAllRelatedPatients from '../controllers/staff/getAllRelatedPatients';
 import getNumberOfCompletedAssessments from '../repositories/getNumberOfCompletedAssessments';
-import getRecentCompletedAssessments from '../repositories/getRecentCompletedAssessments';
+import getRecentCompletedTaskSessions from '../repositories/getRecentCompletedTaskSessions';
 import getRecentActivities from '../repositories/getRecentActivities';
 import insertWordRetrievalSession from '../repositories/insertWordRetrievalTaskSession';
 
@@ -154,13 +154,13 @@ router.get('/get_num_assessments_completed/:patientId', async (req: Request, res
   }
 });
 
-// /api/staff/get_recent_assessments_completed
-router.get('/get_recent_assessments_completed/:patientId', async (req: Request, res: Response) => {
+// /api/staff/get_recent_task_sessions_completed
+router.get('/get_recent_task_sessions_completed/:patientId', async (req: Request, res: Response) => {
   const { patientId } = req.params;
 
   try {
-    const assessments = await getRecentCompletedAssessments(patientId);
-    return res.json(assessments);
+    const taskSessions = await getRecentCompletedTaskSessions(patientId);
+    return res.json(taskSessions);
   } catch (error) {
     res.status(500).send({ error: 'An error occurred while fetching the assessments' });
   }
