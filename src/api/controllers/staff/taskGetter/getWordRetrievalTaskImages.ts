@@ -3,7 +3,7 @@ import { Request, Response } from 'express';
 import * as path from 'path';
 import * as fs from 'fs';
 
-export default async function getStaffWordRetrievalTasksImages(req: Request, res: Response): Promise<void>  {
+export default async function getWordRetrievalTasksImages(req: Request, res: Response): Promise<void>  {
     const filePaths: string[] = req.body.filePaths;
 
     if (!Array.isArray(filePaths)) {

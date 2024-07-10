@@ -9,6 +9,8 @@ import checkToken from '../controllers/staff/checkToken';
 import getPatientWordRetrievalTasks from '../controllers/patient/getPatientWordRetrievalTasks';
 import createWordRetrievalTaskSession from '../controllers/patient/createWordRetrievalTaskSession';
 
+import getPatientWordRetrievalTaskImage from '../controllers/patient/getPatientWordRetrievalTaskImage'
+
 const router: Router = Router();
 
 // /api/patient/login
@@ -48,8 +50,12 @@ router.get('/get-word-retrieval-task', async (req: Request, res: Response) => {
 
 // /api/patient/create-word-retrieval-task-session
 router.post('/create-word-retrieval-task-session', async (req: Request, res: Response) => {
-  console.log('success')
   createWordRetrievalTaskSession(req, res)
+})
+
+// /api/patient/get-word-retrieval-task-image
+router.post('/get-word-retrieval-task-image', async (req: Request, res: Response) => {
+  getPatientWordRetrievalTaskImage(req, res)
 })
 
 export default router;
