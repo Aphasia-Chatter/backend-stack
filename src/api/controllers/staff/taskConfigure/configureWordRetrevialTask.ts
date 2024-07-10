@@ -120,28 +120,29 @@ export async function configureWordRetrevialTask(
         }
 
 //#region Uploaded file validation
-        let filePath = targetTask.word_retrieval_task!.imagePath
-        let originalFilePath = ""
-        if (req.file) {
-            originalFilePath = filePath
-            filePath = req.file.path
+        // let filePath = targetTask.word_retrieval_task!.imagePath
+        // let originalFilePath = ""
+        // if (req.file) {
+        //     originalFilePath = filePath
+        //     filePath = req.file.path
            
-            if (!ALLOWED_IMAGE_TYPES.includes(req.file.mimetype)) {
-                deleteUploadedFile(req);
-                return res.status(400).json({
-                    status: "BAD_IMAGE_TYPE",
-                    message: `Invalid image type. Expected one of ${ALLOWED_IMAGE_TYPES.join(', ')}`,
-                    data: {}
-                });
-            }
-        }
+        //     if (!ALLOWED_IMAGE_TYPES.includes(req.file.mimetype)) {
+        //         deleteUploadedFile(req);
+        //         return res.status(400).json({
+        //             status: "BAD_IMAGE_TYPE",
+        //             message: `Invalid image type. Expected one of ${ALLOWED_IMAGE_TYPES.join(', ')}`,
+        //             data: {}
+        //         });
+        //     }
+        // }
 //#endregion
 
-        if (await updateWordRetrevialTaskByID(taskID, taskName, taskDescription, taskAnswer, taskVisibility, filePath)) {
-            if (originalFilePath) {
-                fs.unlinkSync(originalFilePath)
-            }
+        // if (await updateWordRetrevialTaskByID(taskID, taskName, taskDescription, taskAnswer, taskVisibility, filePath)) {
+        //     if (originalFilePath) {
+        //         fs.unlinkSync(originalFilePath)
+        //     }
 
+        if (await updateWordRetrevialTaskByID(taskID, taskName, taskDescription, taskAnswer, taskVisibility)) {
             return res.status(200).json({
                 status: "SUCCESS",
                 message: "Successfully updated task!",
