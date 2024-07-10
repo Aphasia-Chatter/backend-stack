@@ -1,28 +1,11 @@
-import { db } from "src/db";
-import { wordRetrievalSession, task } from "src/schema";
-import { eq, isNotNull, and, desc } from "drizzle-orm";
-
+import { db } from 'src/db';
+import { wordRetrievalSession, task } from 'src/schema';
+import { eq, isNotNull, and, desc } from 'drizzle-orm';
 
 interface TaskSession {
   taskName: string;
-  completed_at: string;
-}
-
-// Helper function to format the date
-function formatDate(dateString: string | null): string {
-  if (!dateString) return "";  // Handle null or undefined dates
-
-  const date = new Date(dateString);
-  const day = date.getDate();
-  const month = date.toLocaleString('default', { month: 'long' });
-  const year = date.getFullYear();
-
-  // Format the day with suffix (e.g., 1st, 2nd, 3rd, 4th, ...)
-  const suffix = day % 10 === 1 && day !== 11 ? 'st' :
-                 day % 10 === 2 && day !== 12 ? 'nd' :
-                 day % 10 === 3 && day !== 13 ? 'rd' : 'th';
-
-  return `${day}${suffix} ${month} ${year} Assessment`;
+  completedAt: string;
+  taskId: string;
 }
 
 export default async function getRecentCompletedTaskSessions(patientId: string): Promise<TaskSession[]> {
@@ -31,6 +14,7 @@ export default async function getRecentCompletedTaskSessions(patientId: string):
       .select({
         taskName: task.name,
         completedAt: wordRetrievalSession.completedAt,
+        taskId: wordRetrievalSession.taskID, // Ensure taskId is included
       })
       .from(wordRetrievalSession)
       .innerJoin(task, eq(wordRetrievalSession.taskID, task.id))
@@ -44,13 +28,11 @@ export default async function getRecentCompletedTaskSessions(patientId: string):
       .orderBy(desc(wordRetrievalSession.completedAt))
       .execute();
 
-    // Map through the results to format the completed_at values
-    const formattedResults = results.map(result => ({
+    return results.map(result => ({
       taskName: result.taskName,
-      completed_at: result.completedAt ? formatDate(result.completedAt.toISOString()) : ""
+      completedAt: result.completedAt ? result.completedAt.toISOString() : "",
+      taskId: result.taskId, // Map taskId properly
     }));
-
-    return formattedResults;
   } catch (error) {
     console.error("Error fetching task sessions:", error);
     throw new Error("An error occurred while fetching task sessions.");

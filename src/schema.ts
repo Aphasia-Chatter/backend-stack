@@ -9,7 +9,7 @@ Index name should be `wrsm_sessionid_idx`
 (`word_retrieval_session_message` -> `wrsm`)
 */
 
-import { integer, pgTable, uuid, text, index, uniqueIndex, varchar, date, timestamp, primaryKey, pgEnum, serial, smallint } from "drizzle-orm/pg-core";
+import { integer, pgTable, uuid, text, index, uniqueIndex, varchar, date, timestamp, boolean, primaryKey, pgEnum, serial, smallint } from "drizzle-orm/pg-core";
 
 //#region Admin
 
