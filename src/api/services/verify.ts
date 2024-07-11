@@ -5,6 +5,7 @@ import { eq } from 'drizzle-orm';
 import tokenizeAnswer from '../utils/languageProcessor/tokenizeAnswer';
 import invoke from '../utils/llm/invoke';
 import insertWordRetrevialTaskHint from '../repositories/insertWordRetrievalTaskHint';
+import {lemmatizer} from "lemmatizer";
 
 export async function verify(req: Request, res: Response): Promise<Response> {
     const request = req.body;
@@ -22,10 +23,9 @@ export async function verify(req: Request, res: Response): Promise<Response> {
 
         // Query from database first
         const result = await db.select().from(wordRetrievalTask).where(eq(wordRetrievalTask.taskID, word_retrieval_task_id));
-        console.log(`Actual Answer: ${result[0]['answer']}`)
 
         for (let i = 0; i < words.length; i++) {
-            if (result[0]['answer'] === words[i]) {
+            if (lemmatizer(result[0]['answer']) === words[i]) {
                 const response = await invoke(`
                     The target answer is ${result[0]['answer']}. Write a congratulatory message 
                     telling the user that he/she got the right answer, and give a short one sentence
@@ -64,7 +64,7 @@ export async function verify(req: Request, res: Response): Promise<Response> {
     } catch(error: any) {
         return res.status(400).json({
             status: "FAILURE",
-            message: "Task not found."
+            message: error.message
         })
     }
 }
