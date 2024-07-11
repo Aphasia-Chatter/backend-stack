@@ -9,6 +9,7 @@ import selectSessionMessagesBySessionID from 'src/api/repositories/selectSession
 import doChatCompletion from 'src/api/services/doChatCompletion';
 import { db } from 'src/db';
 import { wordRetrievalSessionMessage } from 'src/schema';
+import insertLog from 'src/api/repositories/insertLog';
 
 interface ChatOnSessionRequest {
     username: string;
@@ -163,6 +164,10 @@ export default async function chatOnSession(req: Request, res: Response) {
         });
 
     } catch (err) {
+        await insertLog(
+            `Failed to chat on session :: ${err}`,
+            'ERROR'
+        )
         return res.status(500).json({
             'status': 'SERVER_ERROR',
             'message': 'Server encountered an error! Contact admin if persists!',
