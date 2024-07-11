@@ -90,7 +90,8 @@ export default async function getChatSessionHistory(req: Request, res: Response)
                 'id': current.id,
                 'author': current.author,
                 'content': current.content,
-                'timestamp': current.sentAt
+                'timestamp': current.sentAt,
+                'hasAudio': current.audioFilePath !== null
             })
         }
 

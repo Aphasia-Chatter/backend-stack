@@ -143,8 +143,9 @@ router.post('/chat-session-audio', audioUpload.single('audioFile'), async (req: 
 * Each object in 'messages' contain:
 * id
 * author
-* timestamp
-* content
+* timestamp: string, compatiable to init a Date object.
+* content: string
+* hasAudio: boolean, true if this message has audio content
 * 
 * 'data' will be empty if status is not success
 */
