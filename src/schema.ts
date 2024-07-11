@@ -9,7 +9,8 @@ Index name should be `wrsm_sessionid_idx`
 (`word_retrieval_session_message` -> `wrsm`)
 */
 
-import { integer, pgTable, uuid, text, index, uniqueIndex, varchar, date, timestamp, primaryKey, pgEnum, serial, smallint } from "drizzle-orm/pg-core";
+import { integer, pgTable, uuid, text, index, uniqueIndex, varchar, date, timestamp, primaryKey, pgEnum, serial, smallint, boolean } from "drizzle-orm/pg-core";
+
 
 //#region Admin
 
@@ -145,6 +146,7 @@ export const wordRetrievalSession = pgTable('word_retrieval_session', {
 	hintsUsedCount: smallint('hints_used_count').notNull().default(0),
 	startedAt: timestamp('started_at', { mode: 'date', precision: 0, withTimezone: false }).defaultNow().notNull(),
 	completedAt: timestamp('completed_at', { mode: 'date', precision: 0, withTimezone: false }),
+	isSuccessful: boolean('is_successful'),
 }, (session) => ({
 	patientIDx: index('wrs_patientid_idx').on(session.patientID),
 	taskIDx: index('wrs_taskid_idx').on(session.taskID)
