@@ -77,7 +77,9 @@ router.get('/get-word-retrieval-task-image', async (req: Request, res: Response)
  *  'data': {
  *    'botMessageID': ID of the inserted bot message,
  *    'userMessageID': ID of the inserted user message,
- *    'message': Message of the bot
+ *    'message': Message of the bot,
+ *    'completed': True if the session was completed from the given message
+ *    'isCorrectAnswer': True if the message given was the correct answer
  *  }
  * }
  * 
@@ -115,6 +117,8 @@ const audioUpload = multer({ storage: audioStorage });
 *    'botMessageID': ID of the inserted bot message,
 *    'userMessageID': ID of the inserted user message,
 *    'message': Message of the bot
+*    'completed': True if the session was completed from the given message
+*    'isCorrectAnswer': True if the message given was the correct answer.
 *  }
 * }
 * 

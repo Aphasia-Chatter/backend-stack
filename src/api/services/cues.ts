@@ -5,7 +5,9 @@ import { wordRetrievalTask, wordRetrievalTaskHint } from 'src/schema';
 import insertWordRetrevialTaskHint from '../repositories/insertWordRetrievalTaskHint';
 import { Request, Response } from 'express';
 
-
+/**
+ * Use generateCuesForTask instead for non-web response returns...
+ */
 export async function generateCues(req: Request, res: Response): Promise<Response> {
     const request = req.body;
     var word_retrieval_task_id: any = null;

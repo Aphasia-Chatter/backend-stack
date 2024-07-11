@@ -9,9 +9,16 @@ import selectTaskSessionByID from 'src/api/repositories/selectTaskSessionByID';
 import selectSessionMessagesBySessionID from 'src/api/repositories/selectSessionMessagesBySessionID';
 import doChatCompletion from 'src/api/services/doChatCompletion';
 import { db } from 'src/db';
-import { wordRetrievalSessionMessage } from 'src/schema';
+import { wordRetrievalSession, wordRetrievalSessionMessage } from 'src/schema';
 import insertLog from 'src/api/repositories/insertLog';
 import OpenAI, { toFile } from 'openai';
+import invoke from 'src/api/utils/llm/invoke';
+import { verifyAnswer } from 'src/api/services/verify';
+import selectHintByTaskID from 'src/api/repositories/selectHintByTaskID';
+import { generateCuesForTask } from 'src/api/services/generateCuesForTask';
+import updateTaskSessionSuccessStatus from 'src/api/repositories/updateTaskSessionSuccessStatus';
+import updateIncrementTaskHintUsedCount from 'src/api/repositories/updateIncrementTaskHintUsedCount';
+import { eq } from 'drizzle-orm';
 
 interface ChatOnSessionRequest {
     username: string;
@@ -19,6 +26,9 @@ interface ChatOnSessionRequest {
     sessionID: string;
 }
 
+/**
+ * TODO: Refactor, repeating with chatOnSession.ts
+ */
 export default async function chatAudioOnSession(
     req: Request,
     res: Response
@@ -101,7 +111,7 @@ export default async function chatAudioOnSession(
         }
 
         const task = (await selectWordRetrievalTaskByTaskID(taskSession.taskID))[0];
-        if (task.word_retrieval_task?.inputRestriction == 'VOICE_ONLY') {
+        if (task.word_retrieval_task?.inputRestriction !== 'VOICE_ONLY') {
             return res.status(400).json({
                 'status': 'VOICE_ONLY',
                 'message': 'Voice only task.',
@@ -109,28 +119,6 @@ export default async function chatAudioOnSession(
             })
         }
         
-        // Generate message chain based on history
-        const messageChain = []
-        messageChain.push({
-            'role': 'system',
-            'content': 
-                `
-                The user is seeing an image of a ${task.word_retrieval_task?.answer}, and the user is trying to guess the image's object name. 
-                You are to provide clues and hints to the user based on the input. You are to inform if the user has guessed correctly.
-                `
-        })
-
-        // Populate message chain with history
-        const messageHistory = await selectSessionMessagesBySessionID(jsonReq.sessionID);
-        for (let i = messageHistory.length - 1; i >= 0; i--) {
-            const current = messageHistory[i]
-            const role = current.author === 'bot' ? 'assistant' : current.author;
-            messageChain.push({
-                'role': role,
-                'content': current.content
-            })
-        }
-
         // Transcribe audio, put to message chain
         const audioFileBuffer = Buffer.from(audioFileBase64, 'base64');
         const openai = new OpenAI({
@@ -142,21 +130,41 @@ export default async function chatAudioOnSession(
             file: audioFile,
             model: "whisper-1"
         });
-        messageChain.push({
-            'role': 'user',
-            'content': transcription.text
-        })
 
-        // Perform chat completion with transcribed text
-        const completionResponse = await doChatCompletion(messageChain);
-        const completionMessage = completionResponse.choices[0].message.content!
-        if (!completionMessage) {
-            console.error(`completion message is empty! Completion Object reference :: ${completionResponse}`);
-            return res.status(500).json({
-                'status': 'SERVER_ERROR',
-                'message': 'Server encountered an error! Contact admin if persists!',
-                'data': {}
-            });
+        const isCorrectAnswer = await verifyAnswer(task.task?.id!, transcription.text);
+        let completed = isCorrectAnswer; // Completed if the answer is correct as well
+        let botResponse = ""
+        if (isCorrectAnswer) {
+            botResponse = (await invoke(`
+                The target answer is ${task.word_retrieval_task?.answer}. Write a congratulatory message 
+                telling the user that he/she got the right answer, and give a short one sentence
+                description of the target answer.
+            `))!;
+        } else {
+            // Fetch hints from task
+            const currentHintsUsed = taskSession.hintsUsedCount;
+
+            // Auto-failed after 4th hint
+            if (currentHintsUsed >= 4) {
+                completed = true;
+                botResponse = (await invoke(`
+                    The target answer is ${task.word_retrieval_task?.answer}. Write a short one sentence
+                    description of the target answer.
+                `))!;
+            } else {
+                // Find next hint from database
+                const nextHintORM = await selectHintByTaskID(taskSession.taskID, currentHintsUsed);
+
+                if (nextHintORM.length <= 0) {
+                    // No hints set, generate one.
+                    // TODO: Next tri or something, generate hints based on messaging history and current input
+                    // TODO: Select hierarcy
+                    const cues = await generateCuesForTask(taskSession.taskID, 1, 1)
+                    botResponse = cues[0]
+                } else {
+                    botResponse = nextHintORM[0].content
+                }
+            }
         }
 
         // Insert both messages into database
@@ -173,15 +181,29 @@ export default async function chatAudioOnSession(
             insertedBotMessageORM = await tx.insert(wordRetrievalSessionMessage).values({
                 sessionID: taskSession.id,
                 author: 'bot',
-                content: completionMessage
+                content: botResponse
             }).returning({ id: wordRetrievalSessionMessage.id })
+
+            if (completed) {
+                // Flag completed in database
+                await tx.update(wordRetrievalSession).set(
+                    {isSuccessful: isCorrectAnswer, completedAt: new Date()},
+                ).where(eq(wordRetrievalSession.id, taskSession.id))
+            } 
+
+            if (!completed && !isCorrectAnswer) {
+                // Not completed; Increment hints used
+                await tx.update(wordRetrievalSession).set(
+                    {hintsUsedCount: taskSession.hintsUsedCount + 1}
+                ).where(eq(wordRetrievalSession.id, taskSession.id))
+            }
         });
 
         if (insertedUserMessageOrm.length <= 0 || insertedBotMessageORM.length <= 0) {
             console.error(`Message not inserted!
                 \r\nUser Message Object reference :: ${insertedUserMessageOrm}
                 \r\nBot Message Object reference :: ${insertedBotMessageORM}
-                \r\nCompletion message reference :: ${completionMessage}
+                \r\nBot message reference :: ${botResponse}
             `);
 
             return res.status(500).json({
@@ -197,7 +219,9 @@ export default async function chatAudioOnSession(
             'data': {
                 'botMessageID': insertedBotMessageORM[0].id!,
                 'userMessageID': insertedUserMessageOrm[0].id!,
-                'message': completionMessage
+                'message': botResponse,
+                'completed': completed,
+                'isCorrectAnswer': isCorrectAnswer
             }
         });
 
