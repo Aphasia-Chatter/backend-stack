@@ -68,3 +68,24 @@ export async function verify(req: Request, res: Response): Promise<Response> {
         })
     }
 }
+
+/**
+ * Checks if an answer is successful to a task.
+ * @param taskID 
+ * @param userAnswer 
+ * @returns True if the answer is correct for the task!
+ */
+export async function verifyAnswer(
+    taskID: string,
+    userAnswer: string
+) {
+    const words = tokenizeAnswer(userAnswer);
+    const result = await db.select().from(wordRetrievalTask).where(eq(wordRetrievalTask.taskID, taskID));
+    for (let i = 0; i < words.length; i++) {
+        if (lemmatizer(result[0]['answer']) === words[i]) {
+            return true;
+        }
+    }
+
+    return false;
+}
