@@ -11,6 +11,7 @@ import createWordRetrievalTaskSession from '../controllers/patient/createWordRet
 
 import getPatientWordRetrievalTaskImage from '../controllers/patient/getPatientWordRetrievalTaskImage'
 import chatOnSession from '../controllers/patient/chatOnSession';
+import getChatSessionHistory from '../controllers/patient/getChatSessionHistory';
 
 const router: Router = Router();
 
@@ -60,7 +61,7 @@ router.get('/get-word-retrieval-task-image', async (req: Request, res: Response)
 })
 
 /**
- * /api/patient/chat-session
+ * POST /api/patient/chat-session
  * 
  * @param {string} username
  * @param {string} sessionToken
@@ -77,10 +78,37 @@ router.get('/get-word-retrieval-task-image', async (req: Request, res: Response)
  *  }
  * }
  * 
- * 'data' will be null if status is not success
+ * 'data' will be empty if status is not success
  */
-router.get('/chat-session', async (req: Request, res: Response) => {
+router.post('/chat-session', async (req: Request, res: Response) => {
   chatOnSession(req, res)
+})
+
+/**
+ * POST /api/patient/chat-histories
+ * 
+ * @param {string} username
+ * @param {string} sessionToken
+ * @param {string} sessionID (ID of the session to target)
+ * 
+ * @returns {
+*  'status': Success expected,
+*  'message': Message related to status,
+*  'data': {
+*    'messages': List of object representing messages
+*  }
+* }
+* 
+* Each object in 'messages' contain:
+* id
+* author
+* timestamp
+* content
+* 
+* 'data' will be empty if status is not success
+*/
+router.post('/chat-histories', async (req: Request, res: Response) => {
+  getChatSessionHistory(req, res)
 })
 
 export default router;

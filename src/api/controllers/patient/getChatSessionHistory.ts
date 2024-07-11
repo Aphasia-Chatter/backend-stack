@@ -11,15 +11,14 @@ import { db } from 'src/db';
 import { wordRetrievalSessionMessage } from 'src/schema';
 import insertLog from 'src/api/repositories/insertLog';
 
-interface ChatOnSessionRequest {
+interface GetChatSessionHistoryRequest {
     username: string;
     sessionToken: string;
     sessionID: string;
-    content: string;
 }
 
-export default async function chatOnSession(req: Request, res: Response) {
-    const jsonReq = req.body as Partial<ChatOnSessionRequest>;
+export default async function getChatSessionHistory(req: Request, res: Response) {
+    const jsonReq = req.body as Partial<GetChatSessionHistoryRequest>;
 
     if (!jsonReq.username) {
         return res.status(400).json({
@@ -41,14 +40,6 @@ export default async function chatOnSession(req: Request, res: Response) {
         return res.status(400).json({
             'status': 'MISSING_TASK_ID',
             'message': 'task id is missing in the request body field.',
-            'data': {}
-        });
-    }
-
-    if (!jsonReq.content || jsonReq.content.trim().length === 0) {
-        return res.status(400).json({
-            'status': 'MISSING_CONTENT',
-            'message': 'content is missing in the request body field.',
             'data': {}
         });
     }
@@ -90,86 +81,30 @@ export default async function chatOnSession(req: Request, res: Response) {
         }
 
         const task = (await selectWordRetrievalTaskByTaskID(taskSession.taskID))[0];
-        // Generate message chain based on history
-        const messageChain = []
-        messageChain.push({
-            'role': 'system',
-            'content': 
-                `
-                The user is seeing an image of a ${task.word_retrieval_task?.answer}, and the user is trying to guess the image's object name. 
-                You are to provide clues and hints to the user based on the input. You are to inform if the user has guessed correctly.
-                `
-        })
-
         // Populate message chain with history
         const messageHistory = await selectSessionMessagesBySessionID(jsonReq.sessionID);
-        for (let i = messageHistory.length - 1; i >= 0; i--) {
+        const historyChain = []
+        for (let i = 0; i < messageHistory.length; i++) {
             const current = messageHistory[i]
-            const role = current.author === 'bot' ? 'assistant' : current.author;
-            messageChain.push({
-                'role': role,
-                'content': current.content
+            historyChain.push({
+                'id': current.id,
+                'author': current.author,
+                'content': current.content,
+                'timestamp': current.sentAt
             })
-        }
-        messageChain.push({
-            'role': 'user',
-            'content': jsonReq.content
-        })
-
-        const completionResponse = await doChatCompletion(messageChain);
-        const completionMessage = completionResponse.choices[0].message.content!
-        if (!completionMessage) {
-            console.error(`completion message is empty! Completion Object reference :: ${completionResponse}`);
-            return res.status(500).json({
-                'status': 'SERVER_ERROR',
-                'message': 'Server encountered an error! Contact admin if persists!',
-                'data': {}
-            });
-        }
-
-        let insertedUserMessageOrm: { id: string }[] = [];
-        let insertedBotMessageORM: { id: string }[] = [];
-        await db.transaction(async (tx) => {
-            insertedUserMessageOrm = await tx.insert(wordRetrievalSessionMessage).values({
-                sessionID: taskSession.id,
-                author: 'user',
-                content: jsonReq.content!
-            }).returning({ id: wordRetrievalSessionMessage.id })
-
-            insertedBotMessageORM = await tx.insert(wordRetrievalSessionMessage).values({
-                sessionID: taskSession.id,
-                author: 'bot',
-                content: completionMessage
-            }).returning({ id: wordRetrievalSessionMessage.id })
-        });
-
-        if (insertedUserMessageOrm.length <= 0 || insertedBotMessageORM.length <= 0) {
-            console.error(`Message not inserted!
-                \r\nUser Message Object reference :: ${insertedUserMessageOrm}
-                \r\nBot Message Object reference :: ${insertedBotMessageORM}
-                \r\nCompletion message reference :: ${completionMessage}
-            `);
-
-            return res.status(500).json({
-                'status': 'SERVER_ERROR',
-                'message': 'Server encountered an error! Contact admin if persists!',
-                'data': {}
-            });
         }
 
         return res.status(200).json({
             'status': 'SUCCESS',
             'message': 'message sent successfully!',
             'data': {
-                'botMessageID': insertedBotMessageORM[0].id!,
-                'userMessageID': insertedUserMessageOrm[0].id!,
-                'message': completionMessage
+                'messages': historyChain
             }
         });
 
     } catch (err) {
         await insertLog(
-            `Failed to chat on session :: ${err}`,
+            `Failed to get chat session history :: ${err}`,
             'ERROR'
         )
         return res.status(500).json({
