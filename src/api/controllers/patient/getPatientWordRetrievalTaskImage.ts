@@ -4,7 +4,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 
 export default async function getPatientWordRetrievalTaskImage(req: Request, res: Response): Promise<void> {
-    const filePath: string = req.body.filePath;
+    const filePath = req.query.filePath;
 
     if (typeof filePath !== 'string') {
         res.status(400).send('filePath should be a string');

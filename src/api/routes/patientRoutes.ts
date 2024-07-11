@@ -54,7 +54,7 @@ router.post('/create-word-retrieval-task-session', async (req: Request, res: Res
 })
 
 // /api/patient/get-word-retrieval-task-image
-router.post('/get-word-retrieval-task-image', async (req: Request, res: Response) => {
+router.get('/get-word-retrieval-task-image', async (req: Request, res: Response) => {
   getPatientWordRetrievalTaskImage(req, res)
 })
 
