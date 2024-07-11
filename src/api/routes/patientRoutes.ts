@@ -68,7 +68,7 @@ router.get('/get-word-retrieval-task-image', async (req: Request, res: Response)
  * 
  * @param {string} username
  * @param {string} sessionToken
- * @param {string} sessionID (ID of the session to target)
+ * @param {string} taskSessionID (ID of the task session to target)
  * @param {string} content (User sent content)
  * 
  * @returns {
@@ -107,7 +107,7 @@ const audioUpload = multer({ storage: audioStorage });
  * 
  * @param {string} username
  * @param {string} sessionToken
- * @param {string} sessionID (ID of the session to target)
+ * @param {string} taskSessionID (ID of the task session to target)
  * @param {string} audioFile (Actual audio file itself, same as asr)
  * 
  * @returns {
@@ -134,7 +134,7 @@ router.post('/chat-session-audio', audioUpload.single('audioFile'), async (req: 
  * 
  * @param {string} username
  * @param {string} sessionToken
- * @param {string} sessionID (ID of the session to target)
+ * @param {string} taskSessionID (ID of the task session to target)
  * 
  * @returns {
 *  'status': Success expected,

@@ -21,7 +21,7 @@ import { eq } from 'drizzle-orm';
 interface ChatOnSessionRequest {
     username: string;
     sessionToken: string;
-    sessionID: string;
+    taskSessionID: string;
     content: string;
 }
 
@@ -47,7 +47,7 @@ export default async function chatOnSession(req: Request, res: Response) {
         });
     }
 
-    if (!jsonReq.sessionID) {
+    if (!jsonReq.taskSessionID) {
         return res.status(400).json({
             'status': 'MISSING_TASK_ID',
             'message': 'task id is missing in the request body field.',
@@ -76,7 +76,7 @@ export default async function chatOnSession(req: Request, res: Response) {
 
     try {
         // Get tasks from database.
-        const ormTaskSessions = await selectTaskSessionByID(jsonReq.sessionID);
+        const ormTaskSessions = await selectTaskSessionByID(jsonReq.taskSessionID);
         if (!ormTaskSessions || ormTaskSessions.length <= 0) {
             return res.status(404).json({
                 'status': 'NOT_FOUND',
