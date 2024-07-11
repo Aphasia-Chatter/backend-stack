@@ -10,6 +10,7 @@ import getPatientWordRetrievalTasks from '../controllers/patient/getPatientWordR
 import createWordRetrievalTaskSession from '../controllers/patient/createWordRetrievalTaskSession';
 
 import getPatientWordRetrievalTaskImage from '../controllers/patient/getPatientWordRetrievalTaskImage'
+import chatOnSession from '../controllers/patient/chatOnSession';
 
 const router: Router = Router();
 
@@ -56,6 +57,30 @@ router.post('/create-word-retrieval-task-session', async (req: Request, res: Res
 // /api/patient/get-word-retrieval-task-image
 router.get('/get-word-retrieval-task-image', async (req: Request, res: Response) => {
   getPatientWordRetrievalTaskImage(req, res)
+})
+
+/**
+ * /api/patient/chat-session
+ * 
+ * @param {string} username
+ * @param {string} sessionToken
+ * @param {string} sessionID (ID of the session to target)
+ * @param {string} content (User sent content)
+ * 
+ * @returns {
+ *  'status': Success expected,
+ *  'message': Message related to status,
+ *  'data': {
+ *    'botMessageID': ID of the inserted bot message,
+ *    'userMessageID': ID of the inserted user message,
+ *    'message': Message of the bot
+ *  }
+ * }
+ * 
+ * 'data' will be null if status is not success
+ */
+router.get('/chat-session', async (req: Request, res: Response) => {
+  chatOnSession(req, res)
 })
 
 export default router;
