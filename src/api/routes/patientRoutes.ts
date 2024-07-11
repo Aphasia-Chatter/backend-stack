@@ -12,6 +12,9 @@ import createWordRetrievalTaskSession from '../controllers/patient/createWordRet
 import getPatientWordRetrievalTaskImage from '../controllers/patient/getPatientWordRetrievalTaskImage'
 import chatOnSession from '../controllers/patient/chatOnSession';
 import getChatSessionHistory from '../controllers/patient/getChatSessionHistory';
+import multer from 'multer';
+import OpenAI, { toFile } from 'openai';
+import chatAudioOnSession from '../controllers/patient/chatAudioOnSession';
 
 const router: Router = Router();
 
@@ -82,6 +85,44 @@ router.get('/get-word-retrieval-task-image', async (req: Request, res: Response)
  */
 router.post('/chat-session', async (req: Request, res: Response) => {
   chatOnSession(req, res)
+})
+
+// Set up multer for file uploads
+const audioStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+      cb(null, 'audios/');
+  },
+  filename: (req, file, cb) => {
+      cb(null, `${file.fieldname}-${Date.now()}${(file.originalname)}`);
+  }
+});
+
+// Storage engine
+const audioUpload = multer({ storage: audioStorage });
+
+/**
+ * POST /api/patient/chat-session-audio
+ * 
+ * @param {string} username
+ * @param {string} sessionToken
+ * @param {string} sessionID (ID of the session to target)
+ * @param {string} audioFile (Actual audio file itself, same as asr)
+ * 
+ * @returns {
+*  'status': Success expected,
+*  'message': Message related to status,
+*  'data': {
+*    'botMessageID': ID of the inserted bot message,
+*    'userMessageID': ID of the inserted user message,
+*    'message': Message of the bot
+*  }
+* }
+* 
+* 'data' will be empty if status is not success
+* TODO: Edit multer to validate audio file.
+*/
+router.post('/chat-session-audio', audioUpload.single('audioFile'), async (req: Request, res: Response) => {
+  chatAudioOnSession(req, res)
 })
 
 /**

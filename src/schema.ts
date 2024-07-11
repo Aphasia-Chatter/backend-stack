@@ -160,6 +160,7 @@ export const wordRetrievalSessionMessage = pgTable('word_retrieval_session_messa
 	author: messageAuthorEnum('author').notNull(),
 	content: text('content').notNull(),
 	sentAt: timestamp('sent_at', { mode: 'date', precision: 0, withTimezone: false }).defaultNow().notNull(),
+	audioFilePath: text('audio_file_path'),
 }, (message) => ({
 	sessionIDx: index('wrsm_sessionid_idx').on(message.sessionID),
 }))

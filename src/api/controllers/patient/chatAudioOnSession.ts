@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 
+import fs from 'fs';
 import selectWordRetrievalTaskByTaskID from 'src/api/repositories/selectWordRetrievalTaskByTaskID';
 import selectWordRetrievalTaskSessionByPatientIDAndTaskID from 'src/api/repositories/selectWordRetrievalTaskSessionByPatientIDAndTaskID';
 import insertWordRetrievalTaskSession from 'src/api/repositories/insertWordRetrievalTaskSession';
@@ -10,15 +11,19 @@ import doChatCompletion from 'src/api/services/doChatCompletion';
 import { db } from 'src/db';
 import { wordRetrievalSessionMessage } from 'src/schema';
 import insertLog from 'src/api/repositories/insertLog';
+import OpenAI, { toFile } from 'openai';
 
 interface ChatOnSessionRequest {
     username: string;
     sessionToken: string;
     sessionID: string;
-    content: string;
 }
 
-export default async function chatOnSession(req: Request, res: Response) {
+export default async function chatAudioOnSession(
+    req: Request,
+    res: Response
+) {
+    // TODO: @wqyeo refactor, see /chat-session-audio on patientRoutes.ts
     const jsonReq = req.body as Partial<ChatOnSessionRequest>;
 
     if (!jsonReq.username) {
@@ -45,14 +50,6 @@ export default async function chatOnSession(req: Request, res: Response) {
         });
     }
 
-    if (!jsonReq.content || jsonReq.content.trim().length === 0) {
-        return res.status(400).json({
-            'status': 'MISSING_CONTENT',
-            'message': 'content is missing in the request body field.',
-            'data': {}
-        });
-    }
-
     const validationResult = await validatePatientRequest(req, jsonReq.username)
     if (!validationResult.isValid) {
         return res.status(401).json({
@@ -62,8 +59,22 @@ export default async function chatOnSession(req: Request, res: Response) {
         })
     }
 
-    const relatedUser = validationResult.patient!
+    if (!req.file) {
+        return res.status(400).json({
+            'status': 'MISSING_IMAGE',
+            'message': 'Missing image file. (image: null)',
+            'data': {}
+        });
+    }
 
+    const filePath = req.file.path;
+    const audioFileBase64 = req.body.audioFile;
+    if (!audioFileBase64) {
+        return res.status(400).json({ error: "'audioFile' key is missing or undefined in the request body." });
+    }
+    // TODO: Verify that its an actual audio file.
+
+    const relatedUser = validationResult.patient!
     try {
         // Get tasks from database.
         const ormTaskSessions = await selectTaskSessionByID(jsonReq.sessionID);
@@ -112,11 +123,23 @@ export default async function chatOnSession(req: Request, res: Response) {
             })
         }
 
+        // Transcribe audio, put to message chain
+        const audioFileBuffer = Buffer.from(audioFileBase64, 'base64');
+        const openai = new OpenAI({
+            organization: `${process.env.OPENAI_ORGANIZATION}`,
+            project: `${process.env.OPENAI_PROJECT}`
+        })
+        const audioFile = await toFile(audioFileBuffer, "voice.m4a");
+        const transcription = await openai.audio.transcriptions.create({
+            file: audioFile,
+            model: "whisper-1"
+        });
         messageChain.push({
             'role': 'user',
-            'content': jsonReq.content
+            'content': transcription.text
         })
 
+        // Perform chat completion with transcribed text
         const completionResponse = await doChatCompletion(messageChain);
         const completionMessage = completionResponse.choices[0].message.content!
         if (!completionMessage) {
@@ -128,13 +151,15 @@ export default async function chatOnSession(req: Request, res: Response) {
             });
         }
 
+        // Insert both messages into database
         let insertedUserMessageOrm: { id: string }[] = [];
         let insertedBotMessageORM: { id: string }[] = [];
         await db.transaction(async (tx) => {
             insertedUserMessageOrm = await tx.insert(wordRetrievalSessionMessage).values({
                 sessionID: taskSession.id,
                 author: 'user',
-                content: jsonReq.content!
+                content: transcription.text,
+                audioFilePath: filePath
             }).returning({ id: wordRetrievalSessionMessage.id })
 
             insertedBotMessageORM = await tx.insert(wordRetrievalSessionMessage).values({
@@ -173,10 +198,22 @@ export default async function chatOnSession(req: Request, res: Response) {
             `Failed to chat on session :: ${err}`,
             'ERROR'
         )
+        if (filePath) {
+            deleteUploadedFile(filePath);
+        }
         return res.status(500).json({
             'status': 'SERVER_ERROR',
             'message': 'Server encountered an error! Contact admin if persists!',
             'data': {}
         });
+    }
+}
+
+function deleteUploadedFile(filePath: string) {
+    try {
+        fs.unlinkSync(filePath);
+    } catch (error) {
+        console.error("Error deleting file (chatAudioOnSession) :: ", error);
+        insertLog("Error deleting file (chatAudioOnSession) :: " + error, "CRITICAL").then(() => {});
     }
 }
