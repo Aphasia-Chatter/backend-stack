@@ -58,7 +58,6 @@ export async function generateCues(req: Request, res: Response): Promise<Respons
 
                 Below are several examples of cues for the target word "Money" with a hierarchy of ${hierarchy}:
                 
-                It rhymes with 'funny'
                 It sounds like 'bunny'
 
                 Format like above. Keep it short.
@@ -89,9 +88,9 @@ export async function generateCues(req: Request, res: Response): Promise<Respons
 
                 Below are several examples of phonetic cues for the target word "Money" with a hierarchy of ${hierarchy}:
                 
-                M _ _ _ _
-                M _ n _ _
-                M o _ _ y
+                M _ _ _ _ (Fill in the blanks)
+                M _ n _ _ (Fill in the blanks)
+                M o _ _ y (Fill in the blanks)
 
                 Format like above. [Note: _ represents the missing character.] Keep it short.
                 
@@ -151,7 +150,7 @@ export async function generateCues(req: Request, res: Response): Promise<Respons
 
                 Below are several examples of phonetic cues for the target word "Money" with a hierarchy of ${hierarchy}:
                 
-                It starts with 'muh...'
+                It starts with 'mo...'
                 It starts with 'mon...'
                 The word starts with 'mon...'
 
