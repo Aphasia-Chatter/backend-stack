@@ -11,6 +11,7 @@ Index name should be `wrsm_sessionid_idx`
 
 import { integer, pgTable, uuid, text, index, uniqueIndex, varchar, date, timestamp, primaryKey, pgEnum, serial, smallint, boolean } from "drizzle-orm/pg-core";
 
+
 //#region Admin
 
 export const admin = pgTable('admin', {

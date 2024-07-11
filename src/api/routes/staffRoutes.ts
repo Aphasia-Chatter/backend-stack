@@ -26,9 +26,46 @@ import getAllRelatedPatients from '../controllers/staff/getAllRelatedPatients';
 import getNumberOfCompletedAssessments from '../repositories/getNumberOfCompletedAssessments';
 import getRecentCompletedTaskSessions from '../repositories/getRecentCompletedTaskSessions';
 import getRecentActivities from '../repositories/getRecentActivities';
+import getAssessmentDetails from '../repositories/getAssessmentDetails';
+import getTimeTaken from '../repositories/getTimeTaken';
+import getHintsUsed from '../repositories/getHintsUsed';
 import insertWordRetrievalSession from '../repositories/insertWordRetrievalTaskSession';
 
 const router: Router = Router();
+
+router.get('/get-assessment-details', async (req: Request, res: Response) => {
+  const { patientId, taskId } = req.query;
+
+  try {
+    const details = await getAssessmentDetails(patientId as string, taskId as string);
+    res.json(details);
+  } catch (error) {
+    res.status(500).json({ error: 'An error occurred while fetching the assessment details' });
+  }
+});
+
+router.get('/get-time-taken', async (req: Request, res: Response) => {
+  const { taskId } = req.query;
+
+  try {
+    const timeTaken = await getTimeTaken(taskId as string);
+    res.json(timeTaken);
+  } catch (error) {
+    res.status(500).json({ error: 'An error occurred while fetching the time taken' });
+  }
+});
+
+router.get('/get-hints-used', async (req: Request, res: Response) => {
+  const { taskId } = req.query;
+
+  try {
+    const hintsUsed = await getHintsUsed(taskId as string);
+    res.json(hintsUsed);
+  } catch (error) {
+    res.status(500).json({ error: 'An error occurred while fetching hints used' });
+  }
+});
+
 
 // /api/staff/login
 router.post('/login', (req: Request, res: Response) => {
