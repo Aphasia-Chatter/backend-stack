@@ -101,6 +101,14 @@ export default async function chatAudioOnSession(
         }
 
         const task = (await selectWordRetrievalTaskByTaskID(taskSession.taskID))[0];
+        if (task.word_retrieval_task?.inputRestriction == 'VOICE_ONLY') {
+            return res.status(400).json({
+                'status': 'VOICE_ONLY',
+                'message': 'Voice only task.',
+                'data': {}
+            })
+        }
+        
         // Generate message chain based on history
         const messageChain = []
         messageChain.push({

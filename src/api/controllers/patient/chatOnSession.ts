@@ -90,6 +90,14 @@ export default async function chatOnSession(req: Request, res: Response) {
         }
 
         const task = (await selectWordRetrievalTaskByTaskID(taskSession.taskID))[0];
+        if (task.word_retrieval_task?.inputRestriction == 'TEXT_ONLY') {
+            return res.status(400).json({
+                'status': 'TEXT_ONLY',
+                'message': 'Text only task.',
+                'data': {}
+            })
+        }
+
         // Generate message chain based on history
         const messageChain = []
         messageChain.push({
@@ -111,12 +119,12 @@ export default async function chatOnSession(req: Request, res: Response) {
                 'content': current.content
             })
         }
-
         messageChain.push({
             'role': 'user',
             'content': jsonReq.content
         })
 
+        // Perform completion 
         const completionResponse = await doChatCompletion(messageChain);
         const completionMessage = completionResponse.choices[0].message.content!
         if (!completionMessage) {
@@ -128,6 +136,7 @@ export default async function chatOnSession(req: Request, res: Response) {
             });
         }
 
+        // Insert both user and bot message into database
         let insertedUserMessageOrm: { id: string }[] = [];
         let insertedBotMessageORM: { id: string }[] = [];
         await db.transaction(async (tx) => {
