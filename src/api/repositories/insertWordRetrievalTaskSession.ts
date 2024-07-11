@@ -9,7 +9,8 @@ export default async function insertWordRetrievalTaskSession(
         await db.insert(wordRetrievalSession).values({
             patientID: patientID,
             taskID: taskID,
-            hintsUsedCount: 0
+            hintsUsedCount: 0,
+            isSuccessful: false,
         })
     } catch (err) {
         await db.insert(log).values({
