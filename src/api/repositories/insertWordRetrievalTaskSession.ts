@@ -6,15 +6,16 @@ export default async function insertWordRetrievalTaskSession(
     taskID: string
 ) {
     try {
-        await db.insert(wordRetrievalSession).values({
+        return await db.insert(wordRetrievalSession).values({
             patientID: patientID,
             taskID: taskID,
-            hintsUsedCount: 0
-        })
+            hintsUsedCount: 0,
+        }).returning();
     } catch (err) {
         await db.insert(log).values({
             message: `Failed to create word retrieval task session :: ${err}`,
             severity: "CRITICAL"
         })
+        throw err
     }
 }

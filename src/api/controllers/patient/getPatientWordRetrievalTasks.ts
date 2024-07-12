@@ -108,8 +108,6 @@ export default async function getPatientWordRetrievalTasks(req: Request, res: Re
             return task;
         });
 
-        console.log("tasksWithStatus:", tasksWithStatus)
-
         return res.status(200).json({
             status: "SUCCESS",
             message: "Word retrieval tasks successfully retrieved",
