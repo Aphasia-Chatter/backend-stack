@@ -20,17 +20,10 @@ const getTaskMessages = async (sessionId: string) => {
     }
 
     return messages.map((message, index) => {
-      if (index === 0) {
-        return {
-          type: 'Question:',
-          content: message.content,
-          isFirst: true,
-        };
-      }
       return {
-        type: message.author === 'bot' ? 'Cues:' : 'Selected Answer:',
+        author: message.author,
         content: message.content,
-        isFirst: false,
+        isFirst: index === 0,
       };
     });
   } catch (error) {

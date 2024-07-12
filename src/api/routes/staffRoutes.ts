@@ -32,6 +32,7 @@ import getHintsUsed from '../repositories/getHintsUsed';
 import getSuccessPercentage from '../repositories/getSuccessPercentage';
 import getTaskMessages from '../repositories/getTaskMessages';
 import getSessionIdByTaskId from '../repositories/getSessionIdByTaskId';
+import getAnswerStatus from '../repositories/getAnswerStatus';
 import insertWordRetrievalSession from '../repositories/insertWordRetrievalTaskSession';
 
 const router: Router = Router();
@@ -108,6 +109,21 @@ router.get('/get-session-id-by-task-id', async (req: Request, res: Response) => 
     res.json({ sessionId });
   } catch (error) {
     res.status(500).json({ error: 'An error occurred while fetching the session ID' });
+  }
+});
+
+router.get('/get-answer-status', async (req: Request, res: Response) => {
+  const { taskId } = req.query;
+
+  if (!taskId || typeof taskId !== 'string') {
+    return res.status(400).json({ error: 'Task ID is required and must be a string' });
+  }
+
+  try {
+    const isSuccessful = await getAnswerStatus(taskId as string);
+    res.json({ isSuccessful });
+  } catch (error) {
+    res.status(500).json({ error: 'An error occurred while fetching the answer status' });
   }
 });
 
