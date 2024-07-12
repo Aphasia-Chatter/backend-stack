@@ -36,6 +36,7 @@ import getAssessmentDetails from '../repositories/getAssessmentDetails';
 import getTimeTaken from '../repositories/getTimeTaken';
 import getHintsUsed from '../repositories/getHintsUsed';
 import insertWordRetrievalSession from '../repositories/insertWordRetrievalTaskSession';
+import getRecentActivitySummary from '../repositories/getRecentActivitySummary';
 
 const router: Router = Router();
 
@@ -239,6 +240,11 @@ router.get('/get_recent_activities/:patientId', async (req: Request, res: Respon
   } catch (error) {
     res.status(500).send({ error: 'An error occurred while fetching the activities'});
   }
+});
+
+// /api/staff/recent_activity_summary
+router.get('/recent_activity_summary', async (req: Request, res: Response) => {
+  getRecentActivitySummary(req, res);
 });
 
 //#endregion
