@@ -94,6 +94,8 @@ export default async function getMessageAudio(req: Request, res: Response) {
         await fs.promises.access(absolutePath, fs.constants.F_OK);
         const data = await fs.promises.readFile(absolutePath);
         return res.status(200).json({
+            status: 'SUCCESS',
+            'message': 'Data is a base64 encoded string.',
             data: data.toString('base64')
         });
 
