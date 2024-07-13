@@ -16,6 +16,7 @@ import multer from 'multer';
 import OpenAI, { toFile } from 'openai';
 import chatAudioOnSession from '../controllers/patient/chatAudioOnSession';
 import getPatientWordRetrievalTaskById from '../controllers/patient/getPatientWordRetrievalTaskById';
+import getMessageAudio from '../controllers/patient/getMessageAudio';
 
 const router: Router = Router();
 
@@ -161,6 +162,26 @@ router.post('/chat-session-audio', audioUpload.single('audioFile'), async (req: 
 */
 router.post('/chat-histories', async (req: Request, res: Response) => {
   getChatSessionHistory(req, res)
+})
+
+/**
+ * POST /api/patient/message-audio
+ * 
+ * @param {string} username
+ * @param {string} sessionToken
+ * @param {string} messageID (ID of the message)
+ * 
+ * @returns {
+*  'status': Success expected,
+*  'message': Message related to status,
+*  'data': Base64 encoded string of audio
+* }
+* 
+* 
+* 'data' will be empty if status is not success
+*/
+router.post('/message-audio', async (req: Request, res: Response) => {
+  getMessageAudio(req, res)
 })
 
 export default router;
