@@ -15,6 +15,7 @@ import getChatSessionHistory from '../controllers/patient/getChatSessionHistory'
 import multer from 'multer';
 import OpenAI, { toFile } from 'openai';
 import chatAudioOnSession from '../controllers/patient/chatAudioOnSession';
+import getPatientWordRetrievalTaskById from '../controllers/patient/getPatientWordRetrievalTaskById';
 
 const router: Router = Router();
 
@@ -61,6 +62,11 @@ router.post('/create-word-retrieval-task-session', async (req: Request, res: Res
 // /api/patient/get-word-retrieval-task-image
 router.get('/get-word-retrieval-task-image', async (req: Request, res: Response) => {
   getPatientWordRetrievalTaskImage(req, res)
+})
+
+// /api/patient/get-word-retrieval-task-by-id
+router.get('/get-word-retrieval-task-by-id', async (req: Request, res: Response) => {
+  getPatientWordRetrievalTaskById(req, res)
 })
 
 /**
