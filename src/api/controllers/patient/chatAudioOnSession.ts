@@ -29,7 +29,7 @@ interface ChatOnSessionRequest {
 /**
  * TODO: Refactor, repeating with chatOnSession.ts
  */
-export default async function chatAudioOnSession(
+export default async function cshatAudioOnSession(
     req: Request,
     res: Response
 ) {
@@ -145,7 +145,7 @@ export default async function chatAudioOnSession(
             const currentHintsUsed = taskSession.hintsUsedCount;
 
             // Auto-failed after 4th hint
-            if (currentHintsUsed >= 4) {
+            if (currentHintsUsed >= 6) {
                 completed = true;
                 botResponse = (await invoke(`
                     The target answer is ${task.word_retrieval_task?.answer}. Write a short one sentence
@@ -213,6 +213,8 @@ export default async function chatAudioOnSession(
             });
         }
 
+        console.log("completed", completed, "isCorrectAnswer", isCorrectAnswer);
+
         return res.status(200).json({
             'status': 'SUCCESS',
             'message': 'message sent successfully!',
@@ -220,6 +222,7 @@ export default async function chatAudioOnSession(
                 'botMessageID': insertedBotMessageORM[0].id!,
                 'userMessageID': insertedUserMessageOrm[0].id!,
                 'message': botResponse,
+                'transcription': transcription.text,
                 'completed': completed,
                 'isCorrectAnswer': isCorrectAnswer
             }
