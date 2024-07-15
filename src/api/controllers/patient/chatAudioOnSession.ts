@@ -24,12 +24,14 @@ interface ChatOnSessionRequest {
     username: string;
     sessionToken: string;
     taskSessionID: string;
+    audioFilePath: string;
+    audioFileData: string;
 }
 
 /**
  * TODO: Refactor, repeating with chatOnSession.ts
  */
-export default async function cshatAudioOnSession(
+export default async function chatAudioOnSession(
     req: Request,
     res: Response
 ) {
@@ -68,17 +70,17 @@ export default async function cshatAudioOnSession(
             'data': {}
         })
     }
-
-    if (!req.file) {
+    
+    if (!jsonReq.audioFilePath) {
         return res.status(400).json({
-            'status': 'MISSING_IMAGE',
-            'message': 'Missing image file. (image: null)',
+            'status': 'MISSING AUDIO FILE',
+            'message': 'Missing audio file. (image: null)',
             'data': {}
         });
     }
 
-    const filePath = req.file.path;
-    const audioFileBase64 = req.body.audioFile;
+    const filePath = jsonReq.audioFilePath;
+    const audioFileBase64 = jsonReq.audioFileData;
     if (!audioFileBase64) {
         return res.status(400).json({ error: "'audioFile' key is missing or undefined in the request body." });
     }
@@ -111,13 +113,13 @@ export default async function cshatAudioOnSession(
         }
 
         const task = (await selectWordRetrievalTaskByTaskID(taskSession.taskID))[0];
-        if (task.word_retrieval_task?.inputRestriction !== 'VOICE_ONLY') {
+        /*if (task.word_retrieval_task?.inputRestriction !== 'VOICE_ONLY') {
             return res.status(400).json({
                 'status': 'VOICE_ONLY',
                 'message': 'Voice only task.',
                 'data': {}
             })
-        }
+        }*/
         
         // Transcribe audio, put to message chain
         const audioFileBuffer = Buffer.from(audioFileBase64, 'base64');

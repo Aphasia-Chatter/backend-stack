@@ -89,7 +89,7 @@ export default async function getPatientWordRetrievalTasks(req: Request, res: Re
         const taskSessions = await fetchAllPatientWordRetrievalTaskSessionsByTaskIDs(taskIDs);
 
         // Create a map for quick lookup
-        const taskSessionMap = new Map(taskSessions.map(session => [session.taskID, { startedAt: session.startedAt, completedAt: session.completedAt }]));
+        const taskSessionMap = new Map(taskSessions.map(session => [session.taskID, { taskSessionID: session.id, startedAt: session.startedAt, completedAt: session.completedAt }]));
 
         // 4. Add status if taskID does not exist in taskSessionIDs
         const tasksWithStatus = result2.map(task => {
@@ -98,9 +98,9 @@ export default async function getPatientWordRetrievalTasks(req: Request, res: Re
 
             if (taskSession) {
                 if (taskSession.completedAt) {
-                    return { ...task, status: "Completed" };
+                    return { ...task, session: taskSession, status: "Completed" };
                 } else if (taskSession.startedAt) {
-                    return { ...task, status: "In Progress" };
+                    return { ...task, session: taskSession, status: "In Progress" };
                 }
             } else {
                 return { ...task, status: "Not Started" };

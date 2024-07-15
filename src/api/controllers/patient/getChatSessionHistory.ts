@@ -43,7 +43,7 @@ export default async function getChatSessionHistory(req: Request, res: Response)
             'data': {}
         });
     }
-
+    /*
     const validationResult = await validatePatientRequest(req, jsonReq.username)
     if (!validationResult.isValid) {
         return res.status(401).json({
@@ -54,7 +54,7 @@ export default async function getChatSessionHistory(req: Request, res: Response)
     }
 
     const relatedUser = validationResult.patient!
-
+    */
     try {
         // Get tasks from database.
         const ormTaskSessions = await selectTaskSessionByID(jsonReq.taskSessionID);
@@ -68,6 +68,7 @@ export default async function getChatSessionHistory(req: Request, res: Response)
 
         // Check if belongs to user
         const taskSession = ormTaskSessions[0];
+        /*
         if (taskSession.patientID !== relatedUser.id) {
             await insertLog(
                 `Patient (${relatedUser.id}) attempted to access a session he does not own! (${taskSession.id} belongs to ${taskSession.patientID})`,
@@ -78,7 +79,7 @@ export default async function getChatSessionHistory(req: Request, res: Response)
                 'message': 'task session not found!',
                 'data': {}
             })
-        }
+        }*/
 
         const task = (await selectWordRetrievalTaskByTaskID(taskSession.taskID))[0];
         // Populate message chain with history
@@ -97,6 +98,7 @@ export default async function getChatSessionHistory(req: Request, res: Response)
 
         return res.status(200).json({
             'status': 'SUCCESS',
+            'taskSessionID': jsonReq.taskSessionID,
             'message': 'message sent successfully!',
             'data': {
                 'messages': historyChain
