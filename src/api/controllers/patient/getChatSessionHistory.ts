@@ -83,18 +83,28 @@ export default async function getChatSessionHistory(req: Request, res: Response)
 
         const task = (await selectWordRetrievalTaskByTaskID(taskSession.taskID))[0];
         // Populate message chain with history
-        const messageHistory = await selectSessionMessagesBySessionID(jsonReq.taskSessionID);
-        const historyChain = []
-        for (let i = 0; i < messageHistory.length; i++) {
-            const current = messageHistory[i]
-            historyChain.push({
-                'id': current.id,
-                'author': current.author,
-                'content': current.content,
-                'timestamp': current.sentAt,
-                'hasAudio': current.audioFilePath !== null
-            })
+        const messageHistory = (await selectSessionMessagesBySessionID(jsonReq.taskSessionID)).reverse();
+        // Separate user and bot messages
+        const userMessages = messageHistory.filter(message => message.author === 'user');
+        const botMessages = messageHistory.filter(message => message.author === 'bot');
+
+        // Combine messages in the desired order
+        const combinedMessages = [];
+        for (let i = 0; i < userMessages.length; i++) {
+            combinedMessages.push(userMessages[i]);
+            if (botMessages[i]) {
+                combinedMessages.push(botMessages[i]);
+            }
         }
+
+        // Construct the historyChain
+        const historyChain = combinedMessages.map(message => ({
+            'id': message.id,
+            'author': message.author,
+            'content': message.content,
+            'timestamp': message.sentAt,
+            'hasAudio': message.audioFilePath !== null
+        }));
 
         return res.status(200).json({
             'status': 'SUCCESS',

@@ -5,15 +5,13 @@ import { eq } from 'drizzle-orm';
 import tokenizeAnswer from '../utils/languageProcessor/tokenizeAnswer';
 import invoke from '../utils/llm/invoke';
 import insertWordRetrevialTaskHint from '../repositories/insertWordRetrievalTaskHint';
-import {lemmatizer} from "lemmatizer";
+import { lemmatizer } from "lemmatizer";
 
+/*
 export async function verify(req: Request, res: Response): Promise<Response> {
     const request = req.body;
     try {
-        /* 
-            Send JSON body, consisting of the word_retrieval_task_id (which contains the correct answer)
-            and the user's answer
-        */
+        
         const word_retrieval_task_id = request["word_retrieval_task_id"];
         const user_answer = request["user_answer"];
         // Retrieve the words from the user_answer (ASR may pick up several words)
@@ -68,6 +66,7 @@ export async function verify(req: Request, res: Response): Promise<Response> {
         })
     }
 }
+*/
 
 /**
  * Checks if an answer is successful to a task.
@@ -80,9 +79,13 @@ export async function verifyAnswer(
     userAnswer: string
 ) {
     const words = tokenizeAnswer(userAnswer);
+    console.log("Tokenized Words:", words);
     const result = await db.select().from(wordRetrievalTask).where(eq(wordRetrievalTask.taskID, taskID));
+    console.log("Result:", result);
+    console.log("Length of words:", words.length);
     for (let i = 0; i < words.length; i++) {
-        if (lemmatizer(result[0]['answer']) === words[i]) {
+        if (lemmatizer(result[0]['answer'].toLowerCase()) === words[i]) {
+            console.log("Correct Answer!")
             return true;
         }
     }

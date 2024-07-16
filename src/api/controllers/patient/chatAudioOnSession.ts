@@ -133,6 +133,8 @@ export default async function chatAudioOnSession(
             model: "whisper-1"
         });
 
+        console.log(transcription.text);
+
         const isCorrectAnswer = await verifyAnswer(task.task?.id!, transcription.text);
         let completed = isCorrectAnswer; // Completed if the answer is correct as well
         let botResponse = ""
@@ -147,7 +149,7 @@ export default async function chatAudioOnSession(
             const currentHintsUsed = taskSession.hintsUsedCount;
 
             // Auto-failed after 4th hint
-            if (currentHintsUsed >= 6) {
+            if (currentHintsUsed > 6) {
                 completed = true;
                 botResponse = (await invoke(`
                     The target answer is ${task.word_retrieval_task?.answer}. Write a short one sentence
@@ -161,8 +163,28 @@ export default async function chatAudioOnSession(
                     // No hints set, generate one.
                     // TODO: Next tri or something, generate hints based on messaging history and current input
                     // TODO: Select hierarcy
-                    const cues = await generateCuesForTask(taskSession.taskID, 1, 1)
-                    botResponse = cues[0]
+                    if (currentHintsUsed == 0) {
+                        const cues = await generateCuesForTask(taskSession.taskID, 1, 1)
+                        botResponse = cues[0]
+                    }
+                    if (currentHintsUsed == 1) {
+                        const cues = await generateCuesForTask(taskSession.taskID, 1, 2)
+                        botResponse = cues[0]
+                    }
+                    if (currentHintsUsed == 2 || currentHintsUsed == 4) {
+                        const cues = await generateCuesForTask(taskSession.taskID, 1, 3)
+                        botResponse = cues[0]
+                    }
+                    if (currentHintsUsed == 5) {
+                        const cues = await generateCuesForTask(taskSession.taskID, 1, 5)
+                        botResponse = cues[0]
+                    }
+                    if (currentHintsUsed == 6) {
+                        const cues = await generateCuesForTask(taskSession.taskID, 1, 6)
+                        botResponse = cues[0]
+                    }
+                    
+
                 } else {
                     botResponse = nextHintORM[0].content
                 }
@@ -231,6 +253,7 @@ export default async function chatAudioOnSession(
         });
 
     } catch (err) {
+        console.log("What the fuck is this error", err)
         await insertLog(
             `Failed to chat on session :: ${err}`,
             'ERROR'
