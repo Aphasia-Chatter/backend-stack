@@ -130,7 +130,8 @@ export default async function chatAudioOnSession(
         const audioFile = await toFile(audioFileBuffer, "voice.m4a");
         const transcription = await openai.audio.transcriptions.create({
             file: audioFile,
-            model: "whisper-1"
+            model: "whisper-1",
+            language: "en"
         });
 
         console.log(transcription.text);
