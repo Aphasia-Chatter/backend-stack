@@ -80,7 +80,8 @@ export default async function createWordRetrievalTaskSession(req: Request, res: 
             status: 'CREATE_WORD_RETRIEVAL_TASK_SESSION_SUCCESS',
             message: `The new task session for task ${result1[0].task?.name} has been created`,
             data: {
-                'taskID': insertedTask[0].id
+                'taskSessionID': insertedTask[0].id,
+                'taskID': insertedTask[0].taskID,
             }
         });
 
