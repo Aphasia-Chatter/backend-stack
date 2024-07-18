@@ -19,15 +19,23 @@ export async function generateCuesForTask(
             const response = await invoke(`
                 Generate ${numCuesToGenerate} cues for getting aphasia patient to recall the target word: ${result[0]['answer']}.
 
+                Determine first if the word is a noun, verb, adjective, or adverb. Generate the cue(s) accordingly.
+
                 The cue you are to generate is of ${hierarchy} in the cueing hierarchy scale, which is semantic in nature.
 
-                Below are several examples of cues for the target word "Money" with a hierarchy of ${hierarchy}:
+                Below are several examples of cues for the target word "Money" (noun), with a hierarchy of ${hierarchy}:
                 
                 You use this to buy things.
                 Can find inside wallet
                 You deposit this in the bank.
 
-                Format like above. Keep it short.
+                Below are several examples of cues for the target word "Cooking" (verb), with a hierarchy of ${hierarchy}:
+
+                You do this to make food.
+                You need a stove to do this.
+                You need a pan to do this.
+
+                Format like above. Keep it short. The above is an example for a noun, if it is a verb, adjective, or adverb, please adjust accordingly.
                 
                 I want to read the output line by line, so please do not include anything before or after the cues.
             `)
@@ -47,6 +55,8 @@ export async function generateCuesForTask(
         } else if (hierarchy === 2) {
             const response = await invoke(`
                 Generate ${numCuesToGenerate} cues for getting aphasia patient to recall the target word: ${result[0]['answer']}.
+
+                Determine first if the word is a noun, verb, adjective, or adverb. Generate the cue(s) accordingly.
 
                 The cue you are to generate is of ${hierarchy} in the cueing hierarchy scale, which is rhyming in nature.
 
@@ -76,6 +86,8 @@ export async function generateCuesForTask(
             // 3 and 4 has the same cues as hierarchy 4 basically gives out the answer
             const response = await invoke(`
                 Generate ${numCuesToGenerate} cues for getting aphasia patient to recall the target word: ${result[0]['answer']}.
+
+                Determine first if the word is a noun, verb, adjective, or adverb. Generate the cue(s) accordingly.
 
                 The cue you are to generate is of ${hierarchy} in the cueing hierarchy scale, which allows the patient to fill in the blanks.
 
@@ -108,13 +120,21 @@ export async function generateCuesForTask(
             const response = await invoke(`
                 Generate ${numCuesToGenerate} cues for getting aphasia patient to recall the target word: ${result[0]['answer']}.
 
+                Determine first if the word is a noun, verb, adjective, or adverb. Generate the cue(s) accordingly.
+
                 The cue you are to generate is of ${hierarchy} in the cueing hierarchy scale, which allows the patient to see the context of the word in a sentence.
 
-                Below are several examples of phonetic cues for the target word "Money" with a hierarchy of ${hierarchy}:
+                Below are several examples of cues for the target word "Money" with a hierarchy of ${hierarchy}:
                 
                 I need some ____ .(fill in the blank)
                 Pay with ____ .(fill in the blank)
                 She saved ____ for school fees. (fill in the blank)
+
+                Below are some cues for the target word "Cooking" with a hierarchy of ${hierarchy}:
+
+                I love ____.(fill in the blank)
+                She is ____ in the kitchen.(fill in the blank)
+                I am ____ the pizza.(fill in the blank)
 
                 Format like above. [Note: ___ represents the missing word.] Keep it short.
                 
@@ -138,6 +158,8 @@ export async function generateCuesForTask(
         else if (hierarchy === 6) {
             const response = await invoke(`
                 Generate ${numCuesToGenerate} cues for getting aphasia patient to recall the target word: ${result[0]['answer']}.
+
+                Determine first if the word is a noun, verb, adjective, or adverb. Generate the cue(s) accordingly.
 
                 The cue you are to generate is of ${hierarchy} in the cueing hierarchy scale, which provides the first sound/syllable of the target word.
 

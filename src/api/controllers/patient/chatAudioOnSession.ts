@@ -130,7 +130,8 @@ export default async function chatAudioOnSession(
         const audioFile = await toFile(audioFileBuffer, "voice.m4a");
         const transcription = await openai.audio.transcriptions.create({
             file: audioFile,
-            model: "whisper-1"
+            model: "whisper-1",
+            language: "en"
         });
 
         console.log(transcription.text);
@@ -149,7 +150,7 @@ export default async function chatAudioOnSession(
             const currentHintsUsed = taskSession.hintsUsedCount;
 
             // Auto-failed after 4th hint
-            if (currentHintsUsed > 6) {
+            if (currentHintsUsed > 5) {
                 completed = true;
                 botResponse = (await invoke(`
                     The target answer is ${task.word_retrieval_task?.answer}. Write a short one sentence
@@ -163,23 +164,23 @@ export default async function chatAudioOnSession(
                     // No hints set, generate one.
                     // TODO: Next tri or something, generate hints based on messaging history and current input
                     // TODO: Select hierarcy
-                    if (currentHintsUsed == 0) {
+                    if (currentHintsUsed <= 1) {
                         const cues = await generateCuesForTask(taskSession.taskID, 1, 1)
                         botResponse = cues[0]
                     }
-                    if (currentHintsUsed == 1) {
+                    if (currentHintsUsed == 2) {
                         const cues = await generateCuesForTask(taskSession.taskID, 1, 2)
                         botResponse = cues[0]
                     }
-                    if (currentHintsUsed == 2 || currentHintsUsed == 4) {
+                    if (currentHintsUsed == 3) {
                         const cues = await generateCuesForTask(taskSession.taskID, 1, 3)
                         botResponse = cues[0]
                     }
-                    if (currentHintsUsed == 5) {
+                    if (currentHintsUsed == 4) {
                         const cues = await generateCuesForTask(taskSession.taskID, 1, 5)
                         botResponse = cues[0]
                     }
-                    if (currentHintsUsed == 6) {
+                    if (currentHintsUsed == 5) {
                         const cues = await generateCuesForTask(taskSession.taskID, 1, 6)
                         botResponse = cues[0]
                     }
