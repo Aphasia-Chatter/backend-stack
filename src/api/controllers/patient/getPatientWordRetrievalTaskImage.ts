@@ -6,6 +6,7 @@ import * as fs from 'fs';
 export default async function getPatientWordRetrievalTaskImage(req: Request, res: Response): Promise<void> {
     const filePath = req.query.filePath;
 
+    // TODO: Validate filepath to prevent Injection.
     if (typeof filePath !== 'string') {
         res.status(400).send('filePath should be a string');
         return;

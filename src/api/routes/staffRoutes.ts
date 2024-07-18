@@ -35,7 +35,12 @@ import getWordRetrievalTaskOngoingSessionCount from '../controllers/staff/taskGe
 import getAssessmentDetails from '../repositories/getAssessmentDetails';
 import getTimeTaken from '../repositories/getTimeTaken';
 import getHintsUsed from '../repositories/getHintsUsed';
+import getSuccessPercentage from '../repositories/getSuccessPercentage';
+import getTaskMessages from '../repositories/getTaskMessages';
+import getSessionIdByTaskId from '../repositories/getSessionIdByTaskId';
+import getAnswerStatus from '../repositories/getAnswerStatus';
 import insertWordRetrievalSession from '../repositories/insertWordRetrievalTaskSession';
+import getRecentActivitySummary from '../repositories/getRecentActivitySummary';
 
 const router: Router = Router();
 
@@ -69,6 +74,63 @@ router.get('/get-hints-used', async (req: Request, res: Response) => {
     res.json(hintsUsed);
   } catch (error) {
     res.status(500).json({ error: 'An error occurred while fetching hints used' });
+  }
+});
+
+router.get('/get-success-percentage/:patientId', async (req: Request, res: Response) => {
+  const { patientId } = req.params;
+
+  try {
+    const successPercentage = await getSuccessPercentage(patientId);
+    res.json(successPercentage);
+  } catch (error) {
+    res.status(500).json({ error: 'An error occurred while fetching the success percentage' });
+  }
+});
+
+// /api/staff/get-task-messages
+router.get('/get-task-messages', async (req, res) => {
+  const { sessionId } = req.query;
+  if (!sessionId) {
+    return res.status(400).json({ error: 'sessionId is required' });
+  }
+
+  try {
+    const messages = await getTaskMessages(sessionId as string);
+    return res.json(messages);
+  } catch (error) {
+    return res.status(500).json({ error: 'Failed to fetch task messages' });
+  }
+});
+
+// /api/staff/get-session-id-by-task-id
+router.get('/get-session-id-by-task-id', async (req: Request, res: Response) => {
+  const { taskId } = req.query;
+
+  if (!taskId || typeof taskId !== 'string') {
+    return res.status(400).send({ error: 'Task ID is required and must be a string' });
+  }
+
+  try {
+    const sessionId = await getSessionIdByTaskId(taskId as string);
+    res.json({ sessionId });
+  } catch (error) {
+    res.status(500).json({ error: 'An error occurred while fetching the session ID' });
+  }
+});
+
+router.get('/get-answer-status', async (req: Request, res: Response) => {
+  const { taskId } = req.query;
+
+  if (!taskId || typeof taskId !== 'string') {
+    return res.status(400).json({ error: 'Task ID is required and must be a string' });
+  }
+
+  try {
+    const isSuccessful = await getAnswerStatus(taskId as string);
+    res.json({ isSuccessful });
+  } catch (error) {
+    res.status(500).json({ error: 'An error occurred while fetching the answer status' });
   }
 });
 
@@ -239,6 +301,11 @@ router.get('/get_recent_activities/:patientId', async (req: Request, res: Respon
   } catch (error) {
     res.status(500).send({ error: 'An error occurred while fetching the activities'});
   }
+});
+
+// /api/staff/recent_activity_summary
+router.get('/recent_activity_summary', async (req: Request, res: Response) => {
+  getRecentActivitySummary(req, res);
 });
 
 //#endregion

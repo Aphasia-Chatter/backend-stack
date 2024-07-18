@@ -4,6 +4,7 @@ import selectWordRetrievalTaskByTaskID from 'src/api/repositories/selectWordRetr
 import selectWordRetrievalTaskSessionByPatientIDAndTaskID from 'src/api/repositories/selectWordRetrievalTaskSessionByPatientIDAndTaskID';
 import insertWordRetrievalTaskSession from 'src/api/repositories/insertWordRetrievalTaskSession';
 import validatePatientRequest from 'src/api/utils/validatePatientRequest';
+import insertLog from 'src/api/repositories/insertLog';
 
 interface CreateWordRetrievalTaskSessionRequest {
     username: string;
@@ -74,13 +75,21 @@ export default async function createWordRetrievalTaskSession(req: Request, res: 
         }
 
         // Create a word retrieval task session for that patient
-        await insertWordRetrievalTaskSession(relatedUser.id, jsonReq.taskID)
+        const insertedTask = await insertWordRetrievalTaskSession(relatedUser.id, jsonReq.taskID)
         return res.status(201).json({
             status: 'CREATE_WORD_RETRIEVAL_TASK_SESSION_SUCCESS',
             message: `The new task session for task ${result1[0].task?.name} has been created`,
+            data: {
+                'taskSessionID': insertedTask[0].id,
+                'taskID': insertedTask[0].taskID,
+            }
         });
 
     } catch (err) {
+        await insertLog(
+            `Failed to create word retrieval task session :: ${err}`,
+            'ERROR'
+        )
         return res.status(500).json({
             'status': 'SERVER_ERROR',
             'message': 'Server encountered an error! Contact admin if persists!',
