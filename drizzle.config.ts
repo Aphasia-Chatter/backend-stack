@@ -9,9 +9,9 @@ export default defineConfig({
   out: './drizzle',
   dialect: 'postgresql',
   dbCredentials: {
-    host: "postgres_db",
-    user: DATABASE_USER,
-    password: DATABASE_PASSWORD,
-    database: DATABASE_NAME,
+    host: 'localhost',
+    user: 'test',
+    password: 'test',
+    database: 'aphasia',
   },
 });

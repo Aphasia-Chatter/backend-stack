@@ -1,0 +1,1 @@
+export const WORD_RETREVIAL_TASK_ASSETS_DIRECTORY = "word_retrevial_task_assets"

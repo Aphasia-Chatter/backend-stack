@@ -9,7 +9,8 @@ Index name should be `wrsm_sessionid_idx`
 (`word_retrieval_session_message` -> `wrsm`)
 */
 
-import { integer, pgTable, uuid, text, index, uniqueIndex, varchar, date, timestamp, primaryKey, pgEnum, serial, smallint } from "drizzle-orm/pg-core";
+import { integer, pgTable, uuid, text, index, uniqueIndex, varchar, date, timestamp, primaryKey, pgEnum, serial, smallint, boolean } from "drizzle-orm/pg-core";
+
 
 //#region Admin
 
@@ -129,7 +130,8 @@ export const wordRetrievalTaskHint = pgTable('word_retrieval_task_hint', {
 	id: smallint('hint_number').notNull(),
 	taskID: uuid('task_id').references(() => task.id, { onDelete: 'cascade' }).notNull(),
 	content: text('content').notNull(),
-	type: wordRetrievalHintTypeEnum('type').notNull()
+	type: wordRetrievalHintTypeEnum('type').notNull(),
+	hierarchyNum: integer('hierarchy_num').notNull()  // Added the new field here
 }, (table) => {
 	return {
 		pk: primaryKey({ columns: [table.id, table.taskID] }),
@@ -144,6 +146,7 @@ export const wordRetrievalSession = pgTable('word_retrieval_session', {
 	hintsUsedCount: smallint('hints_used_count').notNull().default(0),
 	startedAt: timestamp('started_at', { mode: 'date', precision: 0, withTimezone: false }).defaultNow().notNull(),
 	completedAt: timestamp('completed_at', { mode: 'date', precision: 0, withTimezone: false }),
+	isSuccessful: boolean('is_successful'),
 }, (session) => ({
 	patientIDx: index('wrs_patientid_idx').on(session.patientID),
 	taskIDx: index('wrs_taskid_idx').on(session.taskID)
@@ -157,6 +160,7 @@ export const wordRetrievalSessionMessage = pgTable('word_retrieval_session_messa
 	author: messageAuthorEnum('author').notNull(),
 	content: text('content').notNull(),
 	sentAt: timestamp('sent_at', { mode: 'date', precision: 0, withTimezone: false }).defaultNow().notNull(),
+	audioFilePath: text('audio_file_path'),
 }, (message) => ({
 	sessionIDx: index('wrsm_sessionid_idx').on(message.sessionID),
 }))
