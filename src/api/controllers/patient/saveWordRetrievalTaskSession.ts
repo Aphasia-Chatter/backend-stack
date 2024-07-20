@@ -71,7 +71,7 @@ export default async function saveWordRetrievalTaskSession(req: Request, res: Re
 
         } else {
             // Update the word retrieval task session of that patient
-            await updateWordRetrievalTaskSessionByID(relatedUser.id, jsonReq.taskSessionID, jsonReq.hintsUsedCount, jsonReq.completedAt)
+            await updateWordRetrievalTaskSessionByID(relatedUser.id, jsonReq.taskSessionID, jsonReq.hintsUsedCount!, new Date(jsonReq.completedAt!))
             return res.status(201).json({
                 status: 'CREATE_WORD_RETRIEVAL_TASK_SESSION_SUCCESS',
                 message: `The new task session for task has been created`,

@@ -6,12 +6,12 @@ export default async function updateWordRetrievalTaskSessionByID(
     wordRetrievalSessionID: string,
     patientID: string,
     hintsUsedCount: number,
-    completedAt: string, // How to set timestamp
+    completedAt: Date,
 ) {
     await db.update(wordRetrievalSession)
         .set({ 
             hintsUsedCount: hintsUsedCount,
-            completedAt: completedAt // How to set timestamp
+            completedAt: completedAt
          })
         .where(and(
             eq(wordRetrievalSession.id, wordRetrievalSessionID),
