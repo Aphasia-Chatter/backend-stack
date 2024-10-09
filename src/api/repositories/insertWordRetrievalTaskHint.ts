@@ -15,12 +15,19 @@ export default async function insertWordRetrevialTaskHint(
     hierarchyNum: number,
     type: "message" | "option_select" // Provide the type argument here
 ) {
-    const newHint = {
-        id,
-        taskID,
-        content,
-        hierarchyNum,
-        type
+    try {
+        const newHint = {
+            id,
+            taskID,
+            content,
+            hierarchyNum,
+            type
+        }
+        await db.insert(wordRetrievalTaskHint).values(newHint);
+    } catch (err) {
+        await db.insert(log).values({
+            message: `Failed to create word retrieval task hint :: ${err}`,
+            severity: "CRITICAL"
+        })
     }
-    await db.insert(wordRetrievalTaskHint).values(newHint);
 }
