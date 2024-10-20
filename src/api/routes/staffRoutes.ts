@@ -9,7 +9,7 @@ import login, { LoginType } from '../controllers/login';
 import register, { RegisterType } from '../controllers/register';
 import logout, { LogoutType } from '../controllers/logout';
 import deleteAccount, { DeleteAccountType } from '../controllers/deleteAccount';
-import changeAccountPassword, { ChangeAccountPasswordType } from '../controllers/changeAccountPassword';
+import changeAccountPassword, { ChangeAccountPasswordType } from '../controllers/staff/resetPassword/changeAccountPassword';
 import checkToken from '../controllers/staff/checkToken';
 
 import { multerImagefileFilter } from '../utils/multerImageFileFilter';
