@@ -9,7 +9,7 @@ import login, { LoginType } from '../controllers/login';
 import register, { RegisterType } from '../controllers/register';
 import logout, { LogoutType } from '../controllers/logout';
 import deleteAccount, { DeleteAccountType } from '../controllers/deleteAccount';
-import changeAccountPassword, { ChangeAccountPasswordType } from '../controllers/changeAccountPassword';
+import changeAccountPassword, { ChangeAccountPasswordType } from '../controllers/staff/resetPassword/changeAccountPassword';
 import checkToken from '../controllers/staff/checkToken';
 
 import { multerImagefileFilter } from '../utils/multerImageFileFilter';
@@ -23,7 +23,7 @@ import removeEnrolmentCode from '../controllers/staff/enrollment/removeEnrolment
 import getWordRetrievalTaskImages from '../controllers/staff/taskGetter/getWordRetrievalTaskImages';
 
 import selectPatientByUsername from '../repositories/selectPatientByUsername';
-import selectPatientByLIKE from '../repositories/selectPatientsByLIKE';
+import selectPatientsByLIKE from '../repositories/selectPatientsByLIKE';
 import getAllRelatedPatients from '../controllers/staff/getAllRelatedPatients';
 import getNumberOfCompletedAssessments from '../repositories/getNumberOfCompletedAssessments';
 import getRecentCompletedTaskSessions from '../repositories/getRecentCompletedTaskSessions';
@@ -258,8 +258,9 @@ router.get('/filter', async (req: Request, res: Response) => {
     }
 
     try {
-      const filteredPatients = await selectPatientByLIKE(query as string);
-      return res.json(filteredPatients);
+      await selectPatientsByLIKE(req, res, query as string);
+      // const filteredPatients = await selectPatientsByLIKE(req, res, query as string);
+      // return res.json(filteredPatients);
     } catch (error) {
       console.error('Error fetching filtered patients:', error);
       return res.status(500).json({ error: 'An error occurred while fetching the filtered patients' });

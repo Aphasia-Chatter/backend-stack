@@ -8,6 +8,8 @@ import insertWordRetrevialTask from 'src/api/repositories/insertWordRetrevialTas
 import selectTaskByName from 'src/api/repositories/selectTaskByName';
 import { taskEditorRoleEnum } from 'src/schema';
 
+type VisibilityEnum = "unlisted" | "public" | "editors_patient_only";
+
 export async function createWordRetrevialTask(
     req: Request,
     res: Response,
@@ -19,116 +21,99 @@ export async function createWordRetrevialTask(
 ) {
     let taskName = req.body.name as string;
     const taskDescription = (req.body.description as string ?? "").trim();
+    const taskVisibility = req.body.visibilityOfTask as VisibilityEnum;
     let taskAnswer = req.body.answer as string;
 
     if (!req.file) {
         return res.status(400).json({
-            'status': 'MISSING_IMAGE',
-            'message': 'Missing image file. (image: null)',
-            'data': {}
+          status: "MISSING_IMAGE",
+          message: "Missing image file. (image: null)",
+          data: {},
         });
-    }
-
-    const filePath = req.file.path;
-    if (!taskName || !taskAnswer) {
+      }
+    
+      const filePath = req.file.path;
+      if (!taskName || !taskAnswer || !taskVisibility) {  // Check visibilityOfTask
         deleteUploadedFile(filePath);
         return res.status(400).json({
-            'status': 'MISSING_PARAMETERS',
-            'message': `Missing parameter. Echo: (name: '${taskName}'), (description: '${taskDescription}'), (answer: '${taskAnswer}')`,
-            'data': {}
+          status: "MISSING_PARAMETERS",
+          message: `Missing parameter. Echo: (name: '${taskName}'), (description: '${taskDescription}'), (answer: '${taskAnswer}'), (visibility: '${taskVisibility}')`,
+          data: {},
         });
-    }
-
-    if (!taskName.trim() || !taskAnswer.trim()) {
+      }
+    
+      if (!taskName.trim() || !taskAnswer.trim() || !taskVisibility.trim()) {  // Check for empty visibilityOfTask
         deleteUploadedFile(filePath);
         return res.status(400).json({
-            'status': 'BLANK_PARAMETERS',
-            'message': `Some of the parameters are whitespace or blanks! Echo: (name: '${taskName}'), (description: '${taskDescription}'), (answer: '${taskAnswer}')`,
-            'data': {}
+          status: "BLANK_PARAMETERS",
+          message: `Some of the parameters are whitespace or blanks! Echo: (name: '${taskName}'), (description: '${taskDescription}'), (answer: '${taskAnswer}'), (visibility: '${taskVisibility}')`,
+          data: {},
         });
-    }
-    taskName = taskName.trim()
-    taskAnswer = taskAnswer.trim()
-
-    if (taskName.length >= WORD_RETREVIAL_REQUEST_MAX_LENGTHS.name) {
+      }
+    
+      taskName = taskName.trim();
+      taskAnswer = taskAnswer.trim();
+    
+      if (taskName.length >= WORD_RETREVIAL_REQUEST_MAX_LENGTHS.name) {
         deleteUploadedFile(filePath);
         return res.status(400).json({
-            status: "NAME_TOO_LONG",
-            message: `Task name is too long! MAX: ${WORD_RETREVIAL_REQUEST_MAX_LENGTHS.name}`,
-            data: {}
+          status: "NAME_TOO_LONG",
+          message: `Task name is too long! MAX: ${WORD_RETREVIAL_REQUEST_MAX_LENGTHS.name}`,
+          data: {},
         });
-    }
+      }
 
-    if (taskDescription.length >= WORD_RETREVIAL_REQUEST_MAX_LENGTHS.description) {
-        deleteUploadedFile(filePath);
+      if (!["unlisted", "public", "editors_patient_only"].includes(taskVisibility)) { // Validate the visibility value
         return res.status(400).json({
-            status: "DESCRIPTION_TOO_LONG",
-            message: `Task description is too long! MAX: ${WORD_RETREVIAL_REQUEST_MAX_LENGTHS.description}`,
-            data: {}
+          status: "INVALID_VISIBILITY",
+          message: `Invalid visibility value: ${taskVisibility}. Expected values: 'unlisted', 'public', 'editors_patient_only'.`,
+          data: {},
         });
-    }
-
-    if (taskAnswer.length >= WORD_RETREVIAL_REQUEST_MAX_LENGTHS.answer) {
-        deleteUploadedFile(filePath);
-        return res.status(400).json({
-            status: "ANSWER_TOO_LONG",
-            message: `Task answer is too long! MAX: ${WORD_RETREVIAL_REQUEST_MAX_LENGTHS.answer}`,
-            data: {}
-        });
-    }
-
-    if (!ALLOWED_IMAGE_TYPES.includes(req.file.mimetype)) {
-        deleteUploadedFile(filePath);
-        return res.status(400).json({
-            status: "BAD_IMAGE_TYPE",
-            message: `Invalid image type. Expected one of ${ALLOWED_IMAGE_TYPES.join(', ')}`,
-            data: {}
-        });
-    }
-
-    try {
+      }
+    
+    
+      try {
         const existingTasks = await selectTaskByName(taskName);
-        if (existingTasks.length > 0) { 
-            deleteUploadedFile(filePath);
-            return res.status(400).json({
-                status: "NAME_CONFLICT",
-                message: "A task with the same name already exists!",
-                data: {
-                    "existing_task_id": existingTasks[0].id
-                }
-            });
-        }
-
-        const newTaskID = await insertWordRetrevialTask(taskName, taskDescription, staff.id, taskAnswer, filePath);
-        if (!newTaskID) {
-            deleteUploadedFile(filePath);
-            return res.status(500).json({
-                status: "SERVER_ERROR",
-                message: "Server encountered an error!",
-                data: {}
-            });
-        }
-
-        return res.status(200).json({
-            status: "SUCCESS",
-            message: "New task was successfully created",
+        if (existingTasks.length > 0) {
+          deleteUploadedFile(filePath);
+          return res.status(400).json({
+            status: "NAME_CONFLICT",
+            message: "A task with the same name already exists!",
             data: {
-                "task_id": newTaskID
-            }
-        });
-
-    } catch (error: any) {
-        if (filePath) {
-            deleteUploadedFile(filePath);
+              existing_task_id: existingTasks[0].id,
+            },
+          });
         }
-        
+    
+        const newTaskID = await insertWordRetrevialTask(taskName, taskDescription, staff.id, taskAnswer, filePath, taskVisibility); // Pass visibility
+        if (!newTaskID) {
+          deleteUploadedFile(filePath);
+          return res.status(500).json({
+            status: "SERVER_ERROR",
+            message: "Server encountered an error!",
+            data: {},
+          });
+        }
+    
+        return res.status(200).json({
+          status: "SUCCESS",
+          message: "New task was successfully created",
+          data: {
+            task_id: newTaskID,
+          },
+        });
+      } catch (error: any) {
+        if (filePath) {
+          deleteUploadedFile(filePath);
+        }
+    
         console.error("Error during image upload:", error);
         return res.status(500).json({
-            status: "SERVER_ERROR",
-            message: "Server encountered an error!"
-        })
+          status: "SERVER_ERROR",
+          message: "Server encountered an error!",
+        });
+      }
     }
-}
 
 /**
  * Copies a file from the source path to the destination path. If the destination path

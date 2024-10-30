@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+    import { Request, Response } from 'express';
 
 import generateSessionToken from '../utils/generateSessionToken';
 import encryptClientInformation from '../utils/encryptClientInformation';
