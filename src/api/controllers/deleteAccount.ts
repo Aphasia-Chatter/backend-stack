@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 
 import deleteStaff from '../repositories/deleteStaff';
 import deletePatient from '../repositories/deletePatient';
-import selectPatientByUsernameAndToken from '../repositories/selectPatientByUsernameAndToken';
+import selectPatientByUsername from '../repositories/selectPatientByUsername';
 import validateHash from '../utils/validateHash';
 import deletePatientStaffRelationshipByPatientID from '../repositories/deletePatientStaffRelationshipByPatientID';
 import validateStaffRequest from '../utils/validateStaffRequest';
@@ -20,9 +20,6 @@ interface DeleteAccountRequest {
 
 export default async function deleteAccount(req: Request, res: Response, deleteAccountType: DeleteAccountType) {
     const jsonReq = req.body as Partial<DeleteAccountRequest>;
-    console.log("username:", jsonReq.username)
-    console.log("session:", jsonReq.sessionToken)
-    console.log("pw:", jsonReq.password)
 
     if (!jsonReq.username) {
         return res.status(400).json({
@@ -105,7 +102,7 @@ async function deleteAccountStaff(jsonReq: DeleteAccountRequest, req: Request, r
 
 // Patient Delete Account Function
 async function deleteAccountPatient(jsonReq: DeleteAccountRequest, res: Response) {
-    const result = await selectPatientByUsernameAndToken(jsonReq.username, jsonReq.sessionToken)
+    const result = await selectPatientByUsername(jsonReq.username)
     if (result.length <= 0) {
         return res.status(400).json({
             'status': 'BAD_PATIENT_ACCOUNT',
@@ -117,7 +114,7 @@ async function deleteAccountPatient(jsonReq: DeleteAccountRequest, res: Response
     
     try {
         // Check for password hash
-        if (!(await validateHash(jsonReq.password, relatedPatient.patient.hashedPassword))) {
+        if (!(await validateHash(jsonReq.password, relatedPatient.hashedPassword))) {
             return res.status(400).json({
                 'status': 'DELETE_ACCOUNT_FAILURE',
                 'message': 'Incorrect password! Unable to delete patient account.',
@@ -125,10 +122,10 @@ async function deleteAccountPatient(jsonReq: DeleteAccountRequest, res: Response
             }); 
         }
         else {
-            await deletePatient(relatedPatient.patient.username, relatedPatient.patient.hashedPassword)
+            await deletePatient(relatedPatient.username, relatedPatient.hashedPassword)
 
             // Delete the patient relationship with the staff who created the enrolment code
-            await deletePatientStaffRelationshipByPatientID(relatedPatient.patient.id)
+            await deletePatientStaffRelationshipByPatientID(relatedPatient.id)
             
             return res.status(200).json({
                 'status': 'DELETE_ACCOUNT_SUCCESS',
