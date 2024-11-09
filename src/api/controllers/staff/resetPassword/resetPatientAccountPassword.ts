@@ -1,20 +1,17 @@
 import { Request, Response } from 'express';
 
 import * as argon2 from "argon2";
-import updateStaffPassword from '../../../repositories/updateStaffPassword';
 import updatePatientPassword from '../../../repositories/updatePatientPassword';
 import selectPatientByUsername from '../../../repositories/selectPatientByUsernameAndToken';
 import validateHash from '../../../utils/validateHash';
 import deleteAllPatientSessionToken from '../../../repositories/deleteAllPatientSessionToken';
-import getStaffPassword from '../../../repositories/getStaffPassword';
 import selectStaffByUsername from 'src/api/repositories/selectStaffByUsername';
 
-export enum ChangeAccountPasswordType {
-    STAFF,
-    PATIENT
+export enum ResetPatientAccountPasswordType {
+    STAFF
 }
 
-interface ChangeAccountPasswordRequest {
+interface ResetPatientAccountPasswordRequest {
     staffUsername: string;
     sessionToken: string;
     patientUsername: string;
@@ -23,8 +20,8 @@ interface ChangeAccountPasswordRequest {
     staffPassword: string,
 }
 
-export default async function changeAccountPassword(req: Request, res: Response, changeAccountPasswordType: ChangeAccountPasswordType) {
-    const jsonReq = req.body as Partial<ChangeAccountPasswordRequest>;
+export default async function changeAccountPassword(req: Request, res: Response, resetAccountPasswordType: ResetPatientAccountPasswordType) {
+    const jsonReq = req.body as Partial<ResetPatientAccountPasswordRequest>;
     console.log("Staff Username:", jsonReq.staffUsername)
     console.log("session:", jsonReq.sessionToken)
     console.log("Patient Username:", jsonReq.patientUsername)
@@ -83,13 +80,14 @@ export default async function changeAccountPassword(req: Request, res: Response,
         if (!(await validateHash(jsonReq.staffPassword, relatedUser.hashedPassword))) {
             return res.status(400).json({
                 'status': 'WRONG STAFF PASSWORD',
-                'message': 'Password mismatch!',
+                'message': 'Hashed Password mismatch!',
                 'data': {}
             });
         }
 
         // Continue with patient account password change process
-        await changePatientAccountPassword(jsonReq as ChangeAccountPasswordRequest, res);
+        await changePatientAccountPassword(jsonReq as ResetPatientAccountPasswordRequest, res);
+
     } catch (error) {
         console.error('Error:', error);
         return res.status(500).json({
@@ -101,11 +99,11 @@ export default async function changeAccountPassword(req: Request, res: Response,
 }
 
 // Patient Change Account Password Function
-async function changePatientAccountPassword(jsonReq: ChangeAccountPasswordRequest, res: Response) {
+async function changePatientAccountPassword(jsonReq: ResetPatientAccountPasswordRequest, res: Response) {
     const result = await selectPatientByUsername(jsonReq.patientUsername, jsonReq.sessionToken)
     if (result.length <= 0) {
         return res.status(400).json({
-            'status': 'BAD_PATIENT_ACCOUNT',
+            'status': 'BAD PATIENT ACCOUNT',
             'message': 'User does not exist!'
         });
     }

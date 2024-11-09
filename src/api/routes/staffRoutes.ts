@@ -9,7 +9,7 @@ import login, { LoginType } from '../controllers/login';
 import register, { RegisterType } from '../controllers/register';
 import logout, { LogoutType } from '../controllers/logout';
 import deleteAccount, { DeleteAccountType } from '../controllers/deleteAccount';
-import changeAccountPassword, { ChangeAccountPasswordType } from '../controllers/staff/resetPassword/changeAccountPassword';
+import ResetPatientAccountPassword, { ResetPatientAccountPasswordType } from '../controllers/staff/resetPassword/resetPatientAccountPassword';
 import checkToken from '../controllers/staff/checkToken';
 
 import { multerImagefileFilter } from '../utils/multerImageFileFilter';
@@ -172,9 +172,9 @@ router.post('/delete-account', (req: Request, res: Response) => {
   deleteAccount(req, res, DeleteAccountType.STAFF)
 })
 
-// /api/staff/change-account-password
-router.post('/change-account-password', (req: Request, res: Response) => {
-  changeAccountPassword(req, res, ChangeAccountPasswordType.STAFF)
+// /api/staff/reset-patient-account-password
+router.post('/reset-patient-account-password', (req: Request, res: Response) => {
+  ResetPatientAccountPassword(req, res, ResetPatientAccountPasswordType.STAFF)
 })
 
 // /api/staff/get-all-enrolment-codes
