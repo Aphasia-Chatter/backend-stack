@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 
 import * as argon2 from "argon2";
 import updatePatientPassword from '../../../repositories/updatePatientPassword';
-import selectPatientByUsername from '../../../repositories/selectPatientByUsernameAndToken';
+import selectPatientByUsername from '../../../repositories/selectPatientByUsername';
 import validateHash from '../../../utils/validateHash';
 import deleteAllPatientSessionToken from '../../../repositories/deleteAllPatientSessionToken';
 import selectStaffByUsername from 'src/api/repositories/selectStaffByUsername';
@@ -20,7 +20,7 @@ interface ResetPatientAccountPasswordRequest {
     staffPassword: string,
 }
 
-export default async function changeAccountPassword(req: Request, res: Response, resetAccountPasswordType: ResetPatientAccountPasswordType) {
+export default async function changeAccountPassword(req: Request, res: Response) {
     const jsonReq = req.body as Partial<ResetPatientAccountPasswordRequest>;
     console.log("Staff Username:", jsonReq.staffUsername)
     console.log("session:", jsonReq.sessionToken)
@@ -63,19 +63,19 @@ export default async function changeAccountPassword(req: Request, res: Response,
         });
     }
 
+    if (jsonReq.newPatientPassword != jsonReq.patientConfirmPassword) {
+        return res.status(400).json({
+            'status': 'MISMATCHED PASSWORD',
+            'message': 'New Password and confirm new password in the request body fields do not match.',
+            'data': {}
+        });
+    }   
+
     try {
         const result = await selectStaffByUsername(jsonReq.staffUsername)
 
         const relatedUser = result[0]
         
-        if (jsonReq.newPatientPassword != jsonReq.patientConfirmPassword) {
-            return res.status(400).json({
-                'status': 'MISMATCHED PASSWORD',
-                'message': 'New Password and confirm new password in the request body fields do not match.',
-                'data': {}
-            });
-        }    
-
         // added await because validateHash is a background task
         if (!(await validateHash(jsonReq.staffPassword, relatedUser.hashedPassword))) {
             return res.status(400).json({
@@ -86,7 +86,7 @@ export default async function changeAccountPassword(req: Request, res: Response,
         }
 
         // Continue with patient account password change process
-        await changePatientAccountPassword(jsonReq as ResetPatientAccountPasswordRequest, res);
+        await resetPatientAccountPassword(jsonReq as ResetPatientAccountPasswordRequest, res);
 
     } catch (error) {
         console.error('Error:', error);
@@ -99,8 +99,8 @@ export default async function changeAccountPassword(req: Request, res: Response,
 }
 
 // Patient Change Account Password Function
-async function changePatientAccountPassword(jsonReq: ResetPatientAccountPasswordRequest, res: Response) {
-    const result = await selectPatientByUsername(jsonReq.patientUsername, jsonReq.sessionToken)
+async function resetPatientAccountPassword(jsonReq: ResetPatientAccountPasswordRequest, res: Response) {
+    const result = await selectPatientByUsername(jsonReq.patientUsername)
     if (result.length <= 0) {
         return res.status(400).json({
             'status': 'BAD PATIENT ACCOUNT',

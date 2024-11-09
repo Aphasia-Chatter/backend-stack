@@ -3,7 +3,7 @@ import { Request, Response } from 'express';
 import * as argon2 from "argon2";
 import updateStaffPassword from '../repositories/updateStaffPassword';
 import updatePatientPassword from '../repositories/updatePatientPassword';
-import selectPatientByUsernameAndToken from '../repositories/selectPatientByUsernameAndToken';
+import selectPatientByUsername from '../repositories/selectPatientByUsername';
 import validateHash from '../utils/validateHash';
 import deleteAllPatientSessionToken from '../repositories/deleteAllPatientSessionToken';
 import deleteAllStaffSessionToken from '../repositories/deleteAllStaffSessionToken';
@@ -24,11 +24,6 @@ interface ChangeAccountPasswordRequest {
 
 export default async function changeAccountPassword(req: Request, res: Response, changeAccountPasswordType: ChangeAccountPasswordType) {
     const jsonReq = req.body as Partial<ChangeAccountPasswordRequest>;
-    console.log("username:", jsonReq.username)
-    console.log("session:", jsonReq.sessionToken)
-    console.log("pw:", jsonReq.currentPassword)
-    console.log("new pw:", jsonReq.newPassword)
-    console.log("new cfm pw:", jsonReq.confirmNewPassword)
 
     if (!jsonReq.username) {
         return res.status(400).json({
@@ -87,7 +82,7 @@ export default async function changeAccountPassword(req: Request, res: Response,
     }
 }
 
-// Staff Logout Function
+// Change Staff Account Password Function
 async function changeStaffAccountPassword(jsonReq: ChangeAccountPasswordRequest,req: Request, res: Response) {
     // Check if staff with session exists
     const validationResult = await validateStaffRequest(req, jsonReq.username)
@@ -100,7 +95,6 @@ async function changeStaffAccountPassword(jsonReq: ChangeAccountPasswordRequest,
     }
 
     const relatedStaff = validationResult.staff!
-
 
     try {
         // Check for new password complexity
@@ -147,9 +141,9 @@ async function changeStaffAccountPassword(jsonReq: ChangeAccountPasswordRequest,
     }
 }
 
-// Patient Logout Function
+// Change Patient Account Password Function
 async function changePatientAccountPassword(jsonReq: ChangeAccountPasswordRequest, res: Response) {
-    const result = await selectPatientByUsernameAndToken(jsonReq.username, jsonReq.sessionToken)
+    const result = await selectPatientByUsername(jsonReq.username)
     if (result.length <= 0) {
         return res.status(400).json({
             'status': 'BAD_PATIENT_ACCOUNT',
@@ -166,7 +160,7 @@ async function changePatientAccountPassword(jsonReq: ChangeAccountPasswordReques
         if (!(await validateHash(jsonReq.currentPassword, relatedPatient.hashedPassword))) {
             return res.status(400).json({
                 'status': 'CHANGE_ACCOUNT_PASSWORD_FAILURE',
-                'message': 'Incorrect current password! Unable to update patient account password.',
+                'message': 'Incorrect password! Unable to update patient account password.',
             }); 
         }
         else {

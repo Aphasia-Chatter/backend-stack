@@ -39,7 +39,6 @@ import getSuccessPercentage from '../repositories/getSuccessPercentage';
 import getTaskMessages from '../repositories/getTaskMessages';
 import getSessionIdByTaskId from '../repositories/getSessionIdByTaskId';
 import getAnswerStatus from '../repositories/getAnswerStatus';
-import insertWordRetrievalSession from '../repositories/insertWordRetrievalTaskSession';
 import getRecentActivitySummary from '../repositories/getRecentActivitySummary';
 
 const router: Router = Router();
@@ -174,7 +173,7 @@ router.post('/delete-account', (req: Request, res: Response) => {
 
 // /api/staff/reset-patient-account-password
 router.post('/reset-patient-account-password', (req: Request, res: Response) => {
-  ResetPatientAccountPassword(req, res, ResetPatientAccountPasswordType.STAFF)
+  ResetPatientAccountPassword(req, res)
 })
 
 // /api/staff/get-all-enrolment-codes
