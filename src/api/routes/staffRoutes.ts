@@ -9,7 +9,7 @@ import login, { LoginType } from '../controllers/login';
 import register, { RegisterType } from '../controllers/register';
 import logout, { LogoutType } from '../controllers/logout';
 import deleteAccount, { DeleteAccountType } from '../controllers/deleteAccount';
-import changeAccountPassword, { ChangeAccountPasswordType } from '../controllers/staff/resetPassword/changeAccountPassword';
+import ResetPatientAccountPassword, { ResetPatientAccountPasswordType } from '../controllers/staff/resetPassword/resetPatientAccountPassword';
 import checkToken from '../controllers/staff/checkToken';
 
 import { multerImagefileFilter } from '../utils/multerImageFileFilter';
@@ -39,7 +39,6 @@ import getSuccessPercentage from '../repositories/getSuccessPercentage';
 import getTaskMessages from '../repositories/getTaskMessages';
 import getSessionIdByTaskId from '../repositories/getSessionIdByTaskId';
 import getAnswerStatus from '../repositories/getAnswerStatus';
-import insertWordRetrievalSession from '../repositories/insertWordRetrievalTaskSession';
 import getRecentActivitySummary from '../repositories/getRecentActivitySummary';
 
 const router: Router = Router();
@@ -172,9 +171,9 @@ router.post('/delete-account', (req: Request, res: Response) => {
   deleteAccount(req, res, DeleteAccountType.STAFF)
 })
 
-// /api/staff/change-account-password
-router.post('/change-account-password', (req: Request, res: Response) => {
-  changeAccountPassword(req, res, ChangeAccountPasswordType.STAFF)
+// /api/staff/reset-patient-account-password
+router.post('/reset-patient-account-password', (req: Request, res: Response) => {
+  ResetPatientAccountPassword(req, res)
 })
 
 // /api/staff/get-all-enrolment-codes
