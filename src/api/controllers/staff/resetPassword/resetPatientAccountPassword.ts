@@ -20,7 +20,7 @@ interface ResetPatientAccountPasswordRequest {
     staffPassword: string,
 }
 
-export default async function changeAccountPassword(req: Request, res: Response) {
+export default async function ResetPatientAccountPassword(req: Request, res: Response) {
     const jsonReq = req.body as Partial<ResetPatientAccountPasswordRequest>;
     console.log("Staff Username:", jsonReq.staffUsername)
     console.log("session:", jsonReq.sessionToken)
