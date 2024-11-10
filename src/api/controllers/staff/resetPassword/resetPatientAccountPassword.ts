@@ -31,42 +31,42 @@ export default async function ResetPatientAccountPassword(req: Request, res: Res
     if (!jsonReq.staffUsername) {
         return res.status(400).json({
             'status': 'MISSING STAFF USERNAME',
-            'message': 'staff username is missing in the request body field.'
+            'message': 'Staff username is missing in the request body field.'
         });
     }
 
     if (!jsonReq.sessionToken) {
         return res.status(400).json({
             'status': 'MISSING SESSION',
-            'message': 'session is missing in the request body field.'
+            'message': 'Session is missing in the request body field.'
         });
     }
 
     if (!jsonReq.patientUsername) {
         return res.status(400).json({
             'status': 'MISSING CURRENT PASSWORD',
-            'message': 'patient username is missing in the request body field.'
+            'message': 'Patient username is missing in the request body field.'
         });
     }
 
     if (!jsonReq.newPatientPassword) {
         return res.status(400).json({
             'status': 'MISSING NEW PASSWORD',
-            'message': 'new password is missing in the request body field.'
+            'message': 'New password is missing in the request body field.'
         });
     }
 
     if (!jsonReq.staffPassword) {
         return res.status(400).json({
             'status': 'MISSING CONFIRM NEW PASSWORD',
-            'message': 'staff password is missing in the request body field.'
+            'message': 'Staff password is missing in the request body field.'
         });
     }
 
     if (jsonReq.newPatientPassword != jsonReq.patientConfirmPassword) {
         return res.status(400).json({
             'status': 'MISMATCHED PASSWORD',
-            'message': 'New Password and confirm new password in the request body fields do not match.',
+            'message': 'New Password and Confirm New Password in the request body fields do not match.',
             'data': {}
         });
     }   
