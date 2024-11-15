@@ -1,6 +1,6 @@
 import request from 'supertest';
 import express from 'express';
-import changeAccountPassword, {ChangeAccountPasswordType} from '../../../api/controllers/staff/resetPassword/changeAccountPassword';
+import ResetPatientAccountPassword, {ResetPatientAccountPasswordType} from '../../../api/controllers/staff/resetPassword/resetPatientAccountPassword';
 import selectStaffByUsername from '../../../api/repositories/selectStaffByUsername';
 import validateHash from '../../utils/validateHash';
 import updatePatientPassword from '../../../api/repositories/updatePatientPassword';
@@ -22,13 +22,13 @@ const app = express();
 app.use(express.json());
 
 // Define the specific route for testing directly in the test file
-app.post('/api/staff/change-account-password', async (req, res) => {
-    changeAccountPassword(req, res, ChangeAccountPasswordType.STAFF)
+app.post('/api/staff/reset-patient-account-password', async (req, res) => {
+    ResetPatientAccountPassword(req, res)
 });
 
 
-describe('POST /api/staff/change-account-password', () => {
-    const baseUrl = '/api/staff/change-account-password';
+describe('POST /api/staff/reset-patient-account-password', () => {
+    const baseUrl = '/api/staff/reset-patient-account-password';
 
     beforeEach(() => {
         jest.clearAllMocks();

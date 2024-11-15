@@ -16,7 +16,9 @@ const storage = multer.diskStorage({
 });
 
 // Storage engine
-const upload = multer({ storage: storage });
+const upload = multer({
+    limits: { fieldSize: 25 * 1024 * 1024 },
+});
 
 // /api/asr/transcribe
 router.post('/transcribe', upload.single('audioFile'), (req: Request, res: Response) => {

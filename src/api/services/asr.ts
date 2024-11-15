@@ -14,17 +14,21 @@ const __dirname = dirname('');
 
 export async function transcribe(audioBuffer: Buffer, res: Response) {
     try {
-        // Call the OpenAI Whisper Model to transcribe the audio
-        const audioFile = await toFile(audioBuffer, "voice.m4a"); // <------ Not sure if need store in db
-        const transcription = await openai.audio.transcriptions.create({
-            file: audioFile,
-            model: "whisper-1"
+        const audioFile = new File([audioBuffer], "voice.wav", { type: "audio/wave" });
+
+        const formData = new FormData();
+        formData.append("audiofile", audioFile);
+        
+        const transcription = await fetch("http://172.81.127.5:63557/transcribe/", { // Replace with: http://<PUBLIC_IP>:<EXTERNAL_PORT_THAT_MAPS_TO_50001>/transcribe/
+            method: "POST",
+            body: formData,
         });
 
-        // Return the transcribed text
+        const transcriptionResult = await transcription.json() as { transcription: string };
+
         return res.status(200).json({
             status: "SUCCESS",
-            transcription: transcription.text
+            transcription: transcriptionResult.transcription
         });
     
     } catch (error: any) {
