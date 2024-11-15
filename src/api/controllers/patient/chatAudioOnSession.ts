@@ -141,9 +141,11 @@ export default async function chatAudioOnSession(
         let botResponse = ""
         if (isCorrectAnswer) {
             botResponse = (await invoke(`
-                The target answer is ${task.word_retrieval_task?.answer}. Write a congratulatory message 
-                telling the user that he/she got the right answer, and give a short one sentence
-                description of the target answer.
+                The target answer is ${task.word_retrieval_task?.answer}, which could 
+                refer to an object (noun) or an action (verb). Write a congratulatory 
+                message confirming the correct answer. Then, describe the target answer 
+                briefly based on its type: if it’s an object, describe what it is; if 
+                it’s an action, describe what it involves.
             `))!;
         } else {
             // Fetch hints from task
@@ -153,8 +155,10 @@ export default async function chatAudioOnSession(
             if (currentHintsUsed > 5) {
                 completed = true;
                 botResponse = (await invoke(`
-                    The target answer is ${task.word_retrieval_task?.answer}. Write a short one sentence
-                    description of the target answer.
+                    The target answer is ${task.word_retrieval_task?.answer}, which could 
+                    refer to an object (noun) or an action (verb). Write a short one sentence
+                    description of the target answer, if it’s an object, describe what it is; 
+                    if it’s an action, describe what it involves.
                 `))!;
             } else {
                 // Find next hint from database
