@@ -94,6 +94,7 @@ export default async function selectPatientsByLIKE(req: Request, res: Response, 
         return res.json(result.map((record: any) => ({
             username: record.patient.username,
             enrolledAt: record.patient.enrolledAt,
+            id: record.patient.id
         })));
     } catch (err) {
         console.error(err);
